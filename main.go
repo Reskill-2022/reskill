@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/linkedin"
@@ -25,11 +24,4 @@ func main() {
 	if err := server.Start(appLogger, env, linkedinService); err != nil {
 		appLogger.Fatal().Err(err).Msg("Failed to start server")
 	}
-}
-
-func getAPIKey() (string, error) {
-	if key, ok := os.LookupEnv("PROXYCURL_APIKEY"); ok {
-		return key, nil
-	}
-	return "", fmt.Errorf("can't find proxycurl API key in environment")
 }
