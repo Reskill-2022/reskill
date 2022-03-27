@@ -16,7 +16,7 @@ const (
 
 func Start(logger zerolog.Logger, env config.Environment, linkedinService linkedin.Service) error {
 	e := http.NewServeMux()
-	e.HandleFunc("/", rootHandler(logger))
+	e.HandleFunc("/", rootHandler(logger, env))
 	e.HandleFunc("/auth/linkedin/callback", linkedInCallbackHandler(logger))
 
 	srv := &http.Server{
@@ -31,7 +31,7 @@ func Start(logger zerolog.Logger, env config.Environment, linkedinService linked
 	return srv.ListenAndServe()
 }
 
-func rootHandler(logger zerolog.Logger) http.HandlerFunc {
+func rootHandler(logger zerolog.Logger, env config.Environment) http.HandlerFunc {
 	tmpl := template.New("index.html")
 
 	tmpl, err := template.ParseFiles("server/templates/index.html")
@@ -40,7 +40,15 @@ func rootHandler(logger zerolog.Logger) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := tmpl.Execute(w, nil)
+		redirectURL := fmt.Sprintf("%s://%s/auth/linkedin/callback", "http", r.Host)
+		authAPI := fmt.Sprintf("https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=%s&redirect_uri=%s&scope=r_emailaddress",
+			env[config.ClientID], redirectURL)
+
+		data := IndexTemplateData{
+			AuthAPI: authAPI,
+		}
+
+		err := tmpl.Execute(w, data)
 		if err != nil {
 			logger.Err(err).Msg("Can't execute template")
 			http.Error(w, InternalError, http.StatusInternalServerError)
