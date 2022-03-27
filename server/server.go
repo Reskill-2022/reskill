@@ -158,11 +158,21 @@ func getUserEmail(token string) (string, error) {
 	}
 	defer resp.Body.Close()
 
+	rawJSON, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(string(rawJSON))
+
 	var payload EmailResponse
-	err = json.NewDecoder(resp.Body).Decode(&payload)
+	err = json.Unmarshal(rawJSON, &payload)
 	if err != nil {
 		return "", err
 	}
 
-	return payload.HandleContent.EmailAddress, nil
+	if len(payload.Elements) <= 0 {
+		return "", fmt.Errorf("got empty email list")
+	}
+
+	return payload.Elements[0].HandleContent.EmailAddress, nil
 }

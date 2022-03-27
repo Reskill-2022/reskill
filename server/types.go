@@ -11,9 +11,19 @@ type (
 	}
 
 	EmailResponse struct {
-		Handle        string `json:"handle"`
-		HandleContent struct {
-			EmailAddress string `json:"emailAddress"`
-		} `json:"handle~"`
+		Elements []struct {
+			Handle        string `json:"handle"`
+			HandleContent struct {
+				EmailAddress string `json:"emailAddress"`
+			} `json:"handle~"`
+		}
 	}
+	//emailAddress
+	//{"elements":[
+	//	{
+	//	"handle~": {"emailAddress":"faithfulnessalamu@outlook.com"},
+	//	"handle":"urn:li:emailAddress:7832573868"
+	//	}
+	//	]
+	//	}
 )
