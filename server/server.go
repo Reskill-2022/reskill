@@ -17,6 +17,7 @@ const (
 func Start(logger zerolog.Logger, env config.Environment, linkedinService linkedin.Service) error {
 	e := http.NewServeMux()
 	e.HandleFunc("/", rootHandler(logger))
+	e.HandleFunc("/auth/linkedin/callback", linkedInCallbackHandler(logger))
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,
@@ -45,5 +46,11 @@ func rootHandler(logger zerolog.Logger) http.HandlerFunc {
 			http.Error(w, InternalError, http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func linkedInCallbackHandler(logger zerolog.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
 	}
 }
