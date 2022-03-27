@@ -11,6 +11,7 @@ type (
 	}
 
 	GetProfileInput struct {
+		Email string
 	}
 
 	GetProfileOutput struct {
