@@ -165,7 +165,7 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, serv
 		}
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, dpayload)
+		fmt.Fprintln(w, string(dpayload))
 	}
 }
 
