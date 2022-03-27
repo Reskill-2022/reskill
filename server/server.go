@@ -129,7 +129,7 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment) http
 			return
 		}
 
-		logger.Info().Str("Token", payload.AccessToken).Str("Expires", payload.ExpiresIn).Msg("Successfully received access token")
+		logger.Info().Str("Token", payload.AccessToken).Int("Expires", payload.ExpiresIn).Msg("Successfully received access token")
 
 		// Get user email
 		email, err := getUserEmail(payload.AccessToken)
