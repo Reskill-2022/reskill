@@ -27,7 +27,7 @@ func Start(logger zerolog.Logger, env config.Environment, linkedinService linked
 	logOutput := os.Stdout
 
 	e.Handle("/", handlers.LoggingHandler(logOutput, rootHandler(logger, env)))
-	e.Handle("/auth/linkedin/callback", handlers.LoggingHandler(logOutput, linkedInCallbackHandler(logger, env)))
+	e.Handle("/auth/linkedin/callback", handlers.LoggingHandler(logOutput, linkedInCallbackHandler(logger, env, linkedinService)))
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,
@@ -67,7 +67,7 @@ func rootHandler(logger zerolog.Logger, env config.Environment) http.HandlerFunc
 	}
 }
 
-func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment) http.HandlerFunc {
+func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, service linkedin.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		if code == "" {
@@ -140,6 +140,32 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment) http
 		}
 
 		logger.Info().Str("Email", email).Msg("Successfully received user email")
+
+		input := linkedin.GetProfileInput{Email: email}
+		out, err := service.GetProfile(input)
+		if err != nil {
+			logger.Err(err).Msg("Failed to get user profile data")
+			http.Error(w, "Failed to get data from proxycurl", http.StatusInternalServerError)
+			return
+		}
+
+		d := map[string]interface{}{
+			"fullName":       out.FullName,
+			"email":          out.Email,
+			"location":       out.Location,
+			"phone":          out.Phone,
+			"photo":          out.ProfilePhoto,
+			"workExperience": out.WorkExperience,
+		}
+		dpayload, err := json.Marshal(d)
+		if err != nil {
+			logger.Err(err).Msg("Failed to marshal final payload")
+			http.Error(w, InternalError, http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, dpayload)
 	}
 }
 
