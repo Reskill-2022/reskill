@@ -64,6 +64,12 @@ func rootHandler(logger zerolog.Logger, env config.Environment) http.HandlerFunc
 
 func linkedInCallbackHandler(logger zerolog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		code := r.URL.Query().Get("code")
+		if code == "" {
+			errDesc := r.URL.Query().Get("error_description")
+			http.Error(w, errDesc, http.StatusUnauthorized)
+			return
+		}
+		logger.Info().Str("Code", code).Msg("Successfully received code in redirect url")
 	}
 }
