@@ -22,7 +22,7 @@ func main() {
 	apiKey := env[config.ProxyCurlApiKey]
 	linkedinService := linkedin.New(appLogger, apiKey)
 
-	if err := server.Start(appLogger, linkedinService); err != nil {
+	if err := server.Start(appLogger, env, linkedinService); err != nil {
 		appLogger.Fatal().Err(err).Msg("Failed to start server")
 	}
 }

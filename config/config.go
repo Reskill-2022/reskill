@@ -20,7 +20,7 @@ func New() (Environment, error) {
 	} {
 		v, ok := os.LookupEnv(key)
 		if !ok {
-			return nil, fmt.Errorf("can't find %q in environment", key)
+			return nil, fmt.Errorf("can't find '%s' in environment", key)
 		}
 		env[key] = v
 	}
