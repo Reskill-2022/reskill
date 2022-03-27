@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -104,7 +104,11 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment) http
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			log.Err(fmt.Errorf("expected status code 200, got %d", resp.StatusCode)).Msg("Request failed")
+			logger.Err(fmt.Errorf("expected status code 200, got %d", resp.StatusCode)).Msg("Request failed")
+			_, err := io.Copy(os.Stderr, resp.Body)
+			if err != nil {
+				logger.Err(err).Msg("Failed to write response error")
+			}
 			http.Error(w, "Failed to get access token", http.StatusInternalServerError)
 			return
 		}
