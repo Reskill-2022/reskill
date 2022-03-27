@@ -21,6 +21,7 @@ func Start(logger zerolog.Logger, env config.Environment, linkedinService linked
 		Addr:         fmt.Sprintf(":%s", env[config.Port]),
 	}
 
+	logger.Info().Str("Address", srv.Addr).Msg("Starting HTTP server")
 	return srv.ListenAndServe()
 }
 
