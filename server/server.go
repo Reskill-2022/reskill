@@ -2,11 +2,13 @@ package server
 
 import (
 	"fmt"
+	"github.com/gorilla/handlers"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"html/template"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -16,8 +18,11 @@ const (
 
 func Start(logger zerolog.Logger, env config.Environment, linkedinService linkedin.Service) error {
 	e := http.NewServeMux()
-	e.HandleFunc("/", rootHandler(logger, env))
-	e.HandleFunc("/auth/linkedin/callback", linkedInCallbackHandler(logger))
+
+	logOutput := os.Stdout
+
+	e.Handle("/", handlers.LoggingHandler(logOutput, rootHandler(logger, env)))
+	e.Handle("/auth/linkedin/callback", handlers.LoggingHandler(logOutput, linkedInCallbackHandler(logger)))
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,
