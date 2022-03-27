@@ -5,13 +5,18 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/linkedin"
+	"html/template"
 	"net/http"
 	"time"
 )
 
+const (
+	InternalError = "Something Bad Happened!"
+)
+
 func Start(logger zerolog.Logger, env config.Environment, linkedinService linkedin.Service) error {
 	e := http.NewServeMux()
-	e.HandleFunc("/", rootHandler)
+	e.HandleFunc("/", rootHandler(logger))
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,
@@ -25,6 +30,20 @@ func Start(logger zerolog.Logger, env config.Environment, linkedinService linked
 	return srv.ListenAndServe()
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func rootHandler(logger zerolog.Logger) http.HandlerFunc {
+	tmpl := template.New("index.html")
 
+	tmpl, err := template.ParseFiles("server/templates/index.html")
+	if err != nil {
+		logger.Fatal().Err(err).Msg("Failed to parse template file")
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := tmpl.Execute(w, nil)
+		if err != nil {
+			logger.Err(err).Msg("Can't execute template")
+			http.Error(w, InternalError, http.StatusInternalServerError)
+			return
+		}
+	}
 }
