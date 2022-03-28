@@ -50,7 +50,7 @@ func rootHandler(logger zerolog.Logger, env config.Environment) http.HandlerFunc
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		redirectURL := fmt.Sprintf("%s://%s/auth/linkedin/callback", "http", r.Host)
+		redirectURL := fmt.Sprintf("%s://%s/auth/linkedin/callback", "https", r.Host)
 		authAPI := fmt.Sprintf("https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=%s&redirect_uri=%s&scope=r_emailaddress",
 			env[config.ClientID], redirectURL)
 
@@ -79,7 +79,7 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, serv
 
 		// get access token
 		endpoint := "https://www.linkedin.com/oauth/v2/accessToken"
-		redirectURL := fmt.Sprintf("%s://%s/auth/linkedin/callback", "http", r.Host)
+		redirectURL := fmt.Sprintf("%s://%s/auth/linkedin/callback", "https", r.Host)
 
 		data := url.Values{}
 		data.Set("grant_type", "authorization_code")
