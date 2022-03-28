@@ -18,12 +18,4 @@ type (
 			} `json:"handle~"`
 		}
 	}
-	//emailAddress
-	//{"elements":[
-	//	{
-	//	"handle~": {"emailAddress":"faithfulnessalamu@outlook.com"},
-	//	"handle":"urn:li:emailAddress:7832573868"
-	//	}
-	//	]
-	//	}
 )
