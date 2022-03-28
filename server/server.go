@@ -144,8 +144,14 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, serv
 		input := linkedin.GetProfileInput{Email: email}
 		out, err := service.GetProfile(input, env)
 		if err != nil {
+			msg := "Failed to get user profile"
+			code := http.StatusInternalServerError
+			if err == linkedin.NonExistentProfile {
+				msg = err.Error()
+				code = http.StatusBadRequest
+			}
 			logger.Err(err).Msg("Failed to get user profile data")
-			http.Error(w, "Failed to get data from proxycurl", http.StatusInternalServerError)
+			http.Error(w, msg, code)
 			return
 		}
 
