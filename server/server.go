@@ -155,15 +155,7 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, serv
 			return
 		}
 
-		d := map[string]interface{}{
-			"fullName":       out.FullName,
-			"email":          out.Email,
-			"location":       out.Location,
-			"phone":          out.Phone,
-			"photo":          out.ProfilePhoto,
-			"workExperience": out.WorkExperience,
-		}
-		dpayload, err := json.Marshal(d)
+		dpayload, err := json.Marshal(out.Payload)
 		if err != nil {
 			logger.Err(err).Msg("Failed to marshal final payload")
 			http.Error(w, InternalError, http.StatusInternalServerError)
@@ -171,6 +163,7 @@ func linkedInCallbackHandler(logger zerolog.Logger, env config.Environment, serv
 		}
 
 		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintln(w, string(dpayload))
 	}
 }

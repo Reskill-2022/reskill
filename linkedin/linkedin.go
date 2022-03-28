@@ -21,27 +21,7 @@ type (
 	}
 
 	GetProfileOutput struct {
-		FullName       string
-		ProfilePhoto   string
-		Location       string
-		Email          string
-		Phone          []string
-		WorkExperience interface{}
-	}
-
-	UserProfileResponse struct {
-		Persons []struct {
-			DisplayName  string   `json:"displayName"`
-			PhoneNumbers []string `json:"phoneNumbers"`
-			Location     string   `json:"location"`
-			PhotoURL     string   `json:"photoUrl"`
-			LinkedInURL  string   `json:"linkedInUrl"`
-			Positions    struct {
-				PositionHistory []struct {
-					Title string `json:"title"`
-				} `json:"positionHistory"`
-			} `json:"positions"`
-		} `json:"persons"`
+		Payload map[string]interface{}
 	}
 
 	lkd struct {
@@ -84,23 +64,17 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 	}
 	defer resp.Body.Close()
 
-	var payload UserProfileResponse
+	var payload map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&payload)
 	if err != nil {
 		return GetProfileOutput{}, err
 	}
 
-	if len(payload.Persons) <= 0 {
+	if len(payload) <= 0 {
 		return GetProfileOutput{}, NonExistentProfile
 	}
 
-	person := payload.Persons[0]
 	return GetProfileOutput{
-		person.DisplayName,
-		person.PhotoURL,
-		person.Location,
-		email,
-		person.PhoneNumbers,
-		person.Positions.PositionHistory,
+		payload,
 	}, nil
 }
