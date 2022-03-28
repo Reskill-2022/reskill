@@ -6,10 +6,9 @@ import (
 )
 
 const (
-	ProxyCurlApiKey = "PROXYCURL_APIKEY"
-	Port            = "PORT"
-	ClientID        = "CLIENT_ID"
-	ClientSecret    = "CLIENT_SECRET"
+	Port         = "PORT"
+	ClientID     = "CLIENT_ID"
+	ClientSecret = "CLIENT_SECRET"
 )
 
 type Environment map[string]string
@@ -18,7 +17,6 @@ func New() (Environment, error) {
 	env := make(Environment)
 	for _, key := range []string{
 		Port,
-		ProxyCurlApiKey,
 		ClientID,
 		ClientSecret,
 	} {

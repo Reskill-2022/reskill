@@ -18,8 +18,7 @@ func main() {
 		appLogger.Fatal().Err(err).Msg("Failed to load configs")
 	}
 
-	apiKey := env[config.ProxyCurlApiKey]
-	linkedinService := linkedin.New(appLogger, apiKey)
+	linkedinService := linkedin.New(appLogger)
 
 	if err := server.Start(appLogger, env, linkedinService); err != nil {
 		appLogger.Fatal().Err(err).Msg("Failed to start server")
