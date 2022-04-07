@@ -25,7 +25,10 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container) {
 
 	{
 		users := api.Group("/users")
-		users.POST("")
+
+		users.POST("", cts.UserController.CreateUser())
+		users.PUT("/:email", cts.UserController.UpdateUser())
+		users.GET("/:email", cts.UserController.GetUser())
 	}
 }
 
