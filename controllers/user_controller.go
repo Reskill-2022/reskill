@@ -17,6 +17,8 @@ func NewUserController() *UserController {
 
 func (u *UserController) CreateUser(userCreator repository.UserCreator) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx := c.Request().Context()
+
 		var requestBody requests.CreateUserRequest
 
 		err := c.Bind(&requestBody)
@@ -30,7 +32,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator) echo.Han
 			Email: requestBody.Email,
 		}
 
-		user, err := userCreator.CreateUser(u)
+		user, err := userCreator.CreateUser(ctx, u)
 		if err != nil {
 			return HandleError(c, err, http.StatusInternalServerError)
 		}
@@ -39,7 +41,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator) echo.Han
 	}
 }
 
-func (u *UserController) UpdateUser() echo.HandlerFunc {
+func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return fmt.Errorf("not implemented")
 	}
