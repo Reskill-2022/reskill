@@ -1,7 +1,11 @@
 package controllers
 
-type Container struct{}
+type Container struct {
+	UserController *UserController
+}
 
 func NewContainer() *Container {
-	return &Container{}
+	return &Container{
+		UserController: NewUserController(),
+	}
 }
