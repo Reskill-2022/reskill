@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
@@ -107,8 +106,15 @@ func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.Han
 	}
 }
 
-func (u *UserController) GetUser() echo.HandlerFunc {
+func (u *UserController) GetUser(userGetter repository.UserGetter) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return fmt.Errorf("not implemented")
+		ctx := c.Request().Context()
+
+		user, err := userGetter.GetUser(ctx, c.Param("email"))
+		if err != nil {
+			return HandleError(c, err, http.StatusInternalServerError)
+		}
+
+		return HandleSuccess(c, user, http.StatusOK)
 	}
 }
