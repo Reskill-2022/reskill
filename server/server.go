@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
-	"github.com/thealamu/linkedinsignin/linkedin"
+	"github.com/thealamu/linkedinsignin/controllers"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,13 +18,21 @@ const (
 	InternalError = "Something Bad Happened!"
 )
 
-func registerRoutes(e *echo.Echo, linkedinService linkedin.Service) {
+func registerRoutes(e *echo.Echo, cts *controllers.Container) {
+	e.Use(middleware.Logger())
+
+	api := e.Group("/api")
+
+	{
+		users := api.Group("/users")
+		users.POST("")
+	}
 }
 
-func Start(logger zerolog.Logger, env config.Environment, linkedinService linkedin.Service) error {
+func Start(logger zerolog.Logger, env config.Environment, cts *controllers.Container) error {
 	e := echo.New()
 
-	registerRoutes(e, linkedinService)
+	registerRoutes(e, cts)
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,

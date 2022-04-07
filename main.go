@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
-	"github.com/thealamu/linkedinsignin/linkedin"
+	"github.com/thealamu/linkedinsignin/controllers"
 	"github.com/thealamu/linkedinsignin/server"
 	"os"
 )
@@ -18,9 +18,9 @@ func main() {
 		appLogger.Fatal().Err(err).Msg("Failed to load configs")
 	}
 
-	linkedinService := linkedin.New(appLogger)
+	cts := controllers.NewContainer()
 
-	if err := server.Start(appLogger, env, linkedinService); err != nil {
+	if err := server.Start(appLogger, env, cts); err != nil {
 		appLogger.Fatal().Err(err).Msg("Failed to start server")
 	}
 }
