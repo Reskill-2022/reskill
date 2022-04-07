@@ -14,10 +14,6 @@ import (
 	"time"
 )
 
-const (
-	InternalError = "Something Bad Happened!"
-)
-
 func registerRoutes(e *echo.Echo, cts *controllers.Container) {
 	e.Use(middleware.Logger())
 
