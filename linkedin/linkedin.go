@@ -60,7 +60,13 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 		return GetProfileOutput{}, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return GetProfileOutput{}, fmt.Errorf("expected 200, got %d", resp.StatusCode)
+		if resp.StatusCode != http.StatusUnauthorized {
+			return GetProfileOutput{}, fmt.Errorf("expected 200, got %d", resp.StatusCode)
+		}
+
+		//token, err := l.getOutlookToken()
+		//if err != nil {
+		//}
 	}
 	defer resp.Body.Close()
 
@@ -78,3 +84,7 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 		payload,
 	}, nil
 }
+
+//func (l *lkd) getOutlookToken() (string, error) {
+//
+//}
