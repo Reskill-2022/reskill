@@ -18,9 +18,6 @@ func New() (Environment, error) {
 	env := make(Environment)
 	for _, key := range []string{
 		Port,
-		ClientID,
-		ClientSecret,
-		OutlookToken,
 	} {
 		v, ok := os.LookupEnv(key)
 		if !ok {
