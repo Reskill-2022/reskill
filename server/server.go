@@ -8,13 +8,15 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/controllers"
+	"github.com/thealamu/linkedinsignin/linkedin"
+	"github.com/thealamu/linkedinsignin/repository"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
-func registerRoutes(e *echo.Echo, cts *controllers.Container) {
+func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Container, service linkedin.Service) {
 	e.Use(middleware.Logger())
 
 	api := e.Group("/api")
@@ -22,16 +24,16 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container) {
 	{
 		users := api.Group("/users")
 
-		users.POST("", cts.UserController.CreateUser())
-		users.PUT("/:email", cts.UserController.UpdateUser())
-		users.GET("/:email", cts.UserController.GetUser())
+		users.POST("", cts.UserController.CreateUser(rc.UserRepository, service))
+		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository))
+		users.GET("/:email", cts.UserController.GetUser(rc.UserRepository))
 	}
 }
 
-func Start(logger zerolog.Logger, env config.Environment, cts *controllers.Container) error {
+func Start(logger zerolog.Logger, env config.Environment, cts *controllers.Container, rc *repository.Container, service linkedin.Service) error {
 	e := echo.New()
 
-	registerRoutes(e, cts)
+	registerRoutes(e, cts, rc, service)
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,
