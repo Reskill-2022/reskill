@@ -25,7 +25,7 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Con
 		users := api.Group("/users")
 
 		users.POST("", cts.UserController.CreateUser(rc.UserRepository, service))
-		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository))
+		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository, rc.UserRepository))
 		users.GET("/:email", cts.UserController.GetUser(rc.UserRepository))
 	}
 }

@@ -49,7 +49,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 	}
 }
 
-func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.HandlerFunc {
+func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdater repository.UserUpdater) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
@@ -60,8 +60,9 @@ func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.Han
 			return HandleError(c, err, http.StatusBadRequest)
 		}
 
-		update := model.User{
-			Email: c.Param("email"),
+		update, err := userGetter.GetUser(ctx, c.Param("email"))
+		if err != nil {
+			return HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		{
@@ -106,7 +107,7 @@ func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.Han
 			}
 		}
 
-		user, err := userUpdater.UpdateUser(ctx, update)
+		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return HandleError(c, err, errors.CodeFrom(err))
 		}
