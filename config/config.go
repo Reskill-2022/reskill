@@ -7,8 +7,7 @@ import (
 
 const (
 	Port         = "PORT"
-	ClientID     = "CLIENT_ID"
-	ClientSecret = "CLIENT_SECRET"
+	MSAAUTH      = "MSAAUTH"
 	OutlookToken = "OUTLOOK_TOKEN"
 )
 
@@ -18,6 +17,7 @@ func New() (Environment, error) {
 	env := make(Environment)
 	for _, key := range []string{
 		Port,
+		MSAAUTH,
 	} {
 		v, ok := os.LookupEnv(key)
 		if !ok {
