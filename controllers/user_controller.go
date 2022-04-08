@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
@@ -23,18 +24,13 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		err := c.Bind(&requestBody)
 		if err != nil {
-			return HandleError(c, err, http.StatusBadRequest)
+			return HandleError(c, errors.From(err, "Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
 		profile, err := service.GetProfile(requestBody.Email)
 		if err != nil {
-			return HandleError(c, err, http.StatusBadRequest)
+			return HandleError(c, errors.From(err, "Failed to Get user profile from LinkedIn", errors.CodeFrom(err)), http.StatusBadRequest)
 		}
-
-		// validate profile has required fields
-		//if profile.Name == "" || profile.Location == "" || profile.Phone == "" {
-		//	return HandleError(c, fmt.Errorf("some fields are missing on your LinkedIn"), http.StatusBadRequest)
-		//}
 
 		u := model.User{
 			Email:       requestBody.Email,
@@ -46,7 +42,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		user, err := userCreator.CreateUser(ctx, u)
 		if err != nil {
-			return HandleError(c, err, http.StatusInternalServerError)
+			return HandleError(c, errors.From(err, "Failed to Create User", errors.CodeFrom(err)), http.StatusInternalServerError)
 		}
 
 		return HandleSuccess(c, user, http.StatusCreated)
@@ -112,7 +108,7 @@ func (u *UserController) UpdateUser(userUpdater repository.UserUpdater) echo.Han
 
 		user, err := userUpdater.UpdateUser(ctx, update)
 		if err != nil {
-			return HandleError(c, err, http.StatusInternalServerError)
+			return HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)
@@ -125,7 +121,7 @@ func (u *UserController) GetUser(userGetter repository.UserGetter) echo.HandlerF
 
 		user, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
-			return HandleError(c, err, http.StatusInternalServerError)
+			return HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)

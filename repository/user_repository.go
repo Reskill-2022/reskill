@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/model"
 )
 
@@ -20,7 +21,7 @@ func NewUserRepository() *UserRepository {
 
 func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
 	if _, ok := u.data[user.Email]; ok {
-		return nil, fmt.Errorf("user with email %s already exists", user.Email)
+		return nil, errors.New(fmt.Sprintf("User with email %s already exists", user.Email), 400)
 	}
 	u.data[user.Email] = &user
 	return &user, nil
@@ -28,7 +29,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 
 func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*model.User, error) {
 	if _, ok := u.data[user.Email]; !ok {
-		return nil, fmt.Errorf("user with email %s does not exist", user.Email)
+		return nil, errors.New(fmt.Sprintf("User with email %s does not exist", user.Email), 400)
 	}
 	u.data[user.Email] = &user
 	return &user, nil
@@ -36,7 +37,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 
 func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User, error) {
 	if _, ok := u.data[email]; !ok {
-		return nil, fmt.Errorf("user with email %s does not exist", email)
+		return nil, errors.New(fmt.Sprintf("User with email %s does not exist", email), 400)
 	}
 	return u.data[email], nil
 }
