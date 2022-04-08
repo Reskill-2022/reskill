@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/requests"
@@ -14,7 +16,7 @@ func NewUserController() *UserController {
 	return &UserController{}
 }
 
-func (u *UserController) CreateUser(userCreator repository.UserCreator) echo.HandlerFunc {
+func (u *UserController) CreateUser(userCreator repository.UserCreator, service linkedin.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
@@ -25,10 +27,22 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator) echo.Han
 			return HandleError(c, err, http.StatusBadRequest)
 		}
 
-		//todo: pull and validate user info from linkedin
+		profile, err := service.GetProfile(requestBody.Email)
+		if err != nil {
+			return HandleError(c, err, http.StatusBadRequest)
+		}
+
+		// validate profile has required fields
+		if profile.Name == "" || profile.Location == "" || profile.Phone == "" {
+			return HandleError(c, fmt.Errorf("some fields are missing on your LinkedIn"), http.StatusBadRequest)
+		}
 
 		u := model.User{
-			Email: requestBody.Email,
+			Email:       requestBody.Email,
+			Name:        profile.Name,
+			LinkedInURL: profile.ProfileURL,
+			Location:    profile.Location,
+			Phone:       profile.Phone,
 		}
 
 		user, err := userCreator.CreateUser(ctx, u)
