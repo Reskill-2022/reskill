@@ -137,11 +137,33 @@ func (l *lkd) getToken() (string, error) {
 	req.URL.RawQuery = q.Encode()
 
 	// headers
-	req.Header.Add("__Host-MSAAUTH", l.MSAAUTH)
+	l.logger.Debug().Msgf("Requesting token for %s", l.MSAAUTH)
+	// add a cookie
+	req.AddCookie(&http.Cookie{
+		Name:  "__Host-MSAAUTH",
+		Value: l.MSAAUTH,
+		Path:  "/",
+	})
+	// dump request headers
+	l.logger.Debug().Msgf("Request Headers")
+	for k, v := range req.Header {
+		l.logger.Debug().Msgf("%s: %s", k, strings.Join(v, ","))
+	}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil && err != http.ErrUseLastResponse {
 		return "", err
+	}
+	// dump response headers
+	l.logger.Debug().Msgf("Response Headers")
+	for k, v := range resp.Header {
+		l.logger.Debug().Msgf("%s: %s", k, strings.Join(v, ","))
 	}
 
 	// extract Location header
