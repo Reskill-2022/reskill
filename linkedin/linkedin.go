@@ -7,13 +7,14 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"net/http"
+	"strings"
 )
 
 var NonExistentProfile = errors.New("No LinkedIn Profile Found")
 
 type (
 	Service interface {
-		GetProfile(GetProfileInput, config.Environment) (GetProfileOutput, error)
+		GetProfile(email string) (GetProfileOutput, error)
 	}
 
 	GetProfileInput struct {
@@ -21,22 +22,45 @@ type (
 	}
 
 	GetProfileOutput struct {
-		Payload map[string]interface{}
+		Email      string
+		Name       string
+		Photo      string
+		ProfileURL string
+		Location   string
+		Phone      string
+	}
+
+	UserProfileResponse struct {
+		Persons []struct {
+			DisplayName  string   `json:"displayName"`
+			PhoneNumbers []string `json:"phoneNumbers"`
+			Location     string   `json:"location"`
+			PhotoURL     string   `json:"photoUrl"`
+			LinkedInURL  string   `json:"linkedInUrl"`
+			Positions    struct {
+				PositionHistory []struct {
+					Title string `json:"title"`
+				} `json:"positionHistory"`
+			} `json:"positions"`
+		} `json:"persons"`
 	}
 
 	lkd struct {
-		logger zerolog.Logger
+		logger  zerolog.Logger
+		MSAAUTH string
+		apiKey  string
 	}
 )
 
-func New(logger zerolog.Logger) Service {
+func New(logger zerolog.Logger, env config.Environment) Service {
 	return &lkd{
-		logger: logger,
+		logger:  logger,
+		MSAAUTH: env["MSAAUTH"],
 	}
 }
 
-func (l *lkd) GetProfile(input GetProfileInput, env config.Environment) (GetProfileOutput, error) {
-	return l.getProfile(input.Email, env[config.OutlookToken])
+func (l *lkd) GetProfile(email string) (GetProfileOutput, error) {
+	return l.getProfile(email, l.apiKey)
 }
 
 func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
@@ -60,31 +84,84 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 		return GetProfileOutput{}, err
 	}
 	if resp.StatusCode != http.StatusOK {
+		l.logger.Debug().Msgf("Got Status Code when getting profile: %d", resp.StatusCode)
 		if resp.StatusCode != http.StatusUnauthorized {
 			return GetProfileOutput{}, fmt.Errorf("expected 200, got %d", resp.StatusCode)
 		}
 
-		//token, err := l.getOutlookToken()
-		//if err != nil {
-		//}
+		token, err := l.getToken()
+		if err != nil {
+			return GetProfileOutput{}, err
+		}
+		// try again once
+		l.logger.Debug().Msgf("Retrying with new token: %s", token)
+		return l.getProfile(email, token)
 	}
 	defer resp.Body.Close()
 
-	var payload map[string]interface{}
+	var payload UserProfileResponse
 	err = json.NewDecoder(resp.Body).Decode(&payload)
 	if err != nil {
 		return GetProfileOutput{}, err
 	}
 
-	if len(payload) <= 0 {
+	if len(payload.Persons) <= 0 {
 		return GetProfileOutput{}, NonExistentProfile
 	}
 
+	person := payload.Persons[0]
 	return GetProfileOutput{
-		payload,
+		Email:      email,
+		Name:       person.DisplayName,
+		Photo:      person.PhotoURL,
+		Location:   person.Location,
+		ProfileURL: person.LinkedInURL,
+		Phone:      firstOrEmpty(person.PhoneNumbers),
 	}, nil
 }
 
-//func (l *lkd) getOutlookToken() (string, error) {
-//
-//}
+func (l *lkd) getToken() (string, error) {
+	endpoint := "https://login.live.com/oauth20_authorize.srf"
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", err
+	}
+
+	q := req.URL.Query()
+	q.Add("response_type", "token")
+	q.Add("prompt", "none")
+	q.Add("redirect_uri", "https://outlook.live.com/owa/auth/dt.aspx")
+	q.Add("scope", "liveprofilecard.access")
+	q.Add("client_id", "292841")
+	req.URL.RawQuery = q.Encode()
+
+	// headers
+	req.Header.Add("__Host-MSAAUTH", l.MSAAUTH)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	// extract Location header
+	location, err := resp.Location()
+	if err != nil {
+		return "", err
+	}
+
+	locationStr := location.String()
+	// strip out the access token
+	locationStr = locationStr[strings.Index(locationStr, "access_token=")+13:]
+	locationStr = locationStr[:strings.Index(locationStr, "&")]
+
+	l.logger.Debug().Msgf("access token: %s", locationStr)
+	return locationStr, nil
+}
+
+func firstOrEmpty(s []string) string {
+	if len(s) > 0 {
+		return s[0]
+	}
+	return ""
+}
