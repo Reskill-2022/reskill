@@ -48,7 +48,7 @@ type (
 	lkd struct {
 		logger  zerolog.Logger
 		MSAAUTH string
-		apiKey  string
+		token   string
 	}
 )
 
@@ -60,7 +60,8 @@ func New(logger zerolog.Logger, env config.Environment) Service {
 }
 
 func (l *lkd) GetProfile(email string) (GetProfileOutput, error) {
-	return l.getProfile(email, l.apiKey)
+	l.logger.Debug().Msg("Getting LinkedIn Profile for " + email)
+	return l.getProfile(email, l.token)
 }
 
 func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
@@ -77,7 +78,7 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 	req.Header.Add("X-ClientArchitectureVersion", "v1")
 	req.Header.Add("X-ClientFeature", "LivePersonaCard")
 	req.Header.Add("X-ClientType", "OwaPeopleHub")
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", l.token))
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -93,9 +94,10 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 		if err != nil {
 			return GetProfileOutput{}, err
 		}
+		l.token = token
 		// try again once
-		l.logger.Debug().Msgf("Retrying with new token: %s", token)
-		return l.getProfile(email, token)
+		l.logger.Debug().Msgf("Retrying with new token: %s", l.token)
+		return l.getProfile(email, l.token)
 	}
 	defer resp.Body.Close()
 
@@ -137,18 +139,13 @@ func (l *lkd) getToken() (string, error) {
 	req.URL.RawQuery = q.Encode()
 
 	// headers
-	l.logger.Debug().Msgf("Requesting token for %s", l.MSAAUTH)
+	l.logger.Debug().Msgf("Requesting token")
 	// add a cookie
 	req.AddCookie(&http.Cookie{
 		Name:  "__Host-MSAAUTH",
 		Value: l.MSAAUTH,
 		Path:  "/",
 	})
-	// dump request headers
-	l.logger.Debug().Msgf("Request Headers")
-	for k, v := range req.Header {
-		l.logger.Debug().Msgf("%s: %s", k, strings.Join(v, ","))
-	}
 
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -159,11 +156,6 @@ func (l *lkd) getToken() (string, error) {
 	resp, err := client.Do(req)
 	if err != nil && err != http.ErrUseLastResponse {
 		return "", err
-	}
-	// dump response headers
-	l.logger.Debug().Msgf("Response Headers")
-	for k, v := range resp.Header {
-		l.logger.Debug().Msgf("%s: %s", k, strings.Join(v, ","))
 	}
 
 	// extract Location header
