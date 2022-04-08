@@ -42,7 +42,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		user, err := userCreator.CreateUser(ctx, u)
 		if err != nil {
-			return HandleError(c, errors.From(err, "Failed to Create User", errors.CodeFrom(err)), http.StatusInternalServerError)
+			return HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusCreated)
