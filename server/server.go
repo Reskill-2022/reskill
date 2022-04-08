@@ -18,6 +18,13 @@ import (
 
 func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Container, service linkedin.Service) {
 	e.Use(middleware.Logger())
+	// allow all origins
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+	}))
 
 	api := e.Group("/api")
 
