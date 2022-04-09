@@ -171,8 +171,10 @@ func (l *lkd) getToken() (string, error) {
 }
 
 func firstOrEmpty(s []string) string {
-	if len(s) > 0 {
-		return s[0]
+	for _, v := range s {
+		if v != "" {
+			return v
+		}
 	}
 	return ""
 }
