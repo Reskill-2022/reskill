@@ -40,16 +40,16 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			return u.HandleError(c, errors.New("Invalid Profile. Found No Name", 400), http.StatusBadRequest)
 		}
 		if profile.Location == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
 		}
 		if profile.Phone == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Phone Number", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Phone Number on LinkedIn", 400), http.StatusBadRequest)
 		}
 		if profile.Photo == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture on LinkedIn", 400), http.StatusBadRequest)
 		}
 		if !profile.HasExperience {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
 		}
 
 		data := model.User{
