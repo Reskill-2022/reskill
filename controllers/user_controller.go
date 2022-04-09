@@ -45,9 +45,6 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		if profile.Location == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
 		}
-		if profile.Phone == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Phone Number on LinkedIn", 400), http.StatusBadRequest)
-		}
 		if profile.Photo == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture on LinkedIn", 400), http.StatusBadRequest)
 		}
