@@ -29,13 +29,17 @@ type (
 		HasExperience bool
 	}
 
+	UserPhone struct {
+		Number string `json:"number"`
+	}
+
 	UserProfileResponse struct {
 		Persons []struct {
-			DisplayName  string   `json:"displayName"`
-			PhoneNumbers []string `json:"phoneNumbers"`
-			Location     string   `json:"location"`
-			PhotoURL     string   `json:"photoUrl"`
-			LinkedInURL  string   `json:"linkedInUrl"`
+			DisplayName  string      `json:"displayName"`
+			PhoneNumbers []UserPhone `json:"phoneNumbers"`
+			Location     string      `json:"location"`
+			PhotoURL     string      `json:"photoUrl"`
+			LinkedInURL  string      `json:"linkedInUrl"`
 			Positions    struct {
 				PositionHistory []struct {
 					Title string `json:"title"`
@@ -172,10 +176,10 @@ func (l *lkd) getToken() (string, error) {
 	return locationStr, nil
 }
 
-func firstOrEmpty(s []string) string {
+func firstOrEmpty(s []UserPhone) string {
 	for _, v := range s {
-		if v != "" {
-			return v
+		if v.Number != "" {
+			return v.Number
 		}
 	}
 	return ""
