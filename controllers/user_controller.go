@@ -27,12 +27,12 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		err := c.Bind(&requestBody)
 		if err != nil {
-			return u.HandleError(c, errors.From(err, "Invalid JSON Request Body", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.New("Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
 		profile, err := service.GetProfile(requestBody.Email)
 		if err != nil {
-			return u.HandleError(c, errors.From(err, "Failed to Get user profile from LinkedIn", errors.CodeFrom(err)), http.StatusBadRequest)
+			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		data := model.User{

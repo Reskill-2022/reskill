@@ -34,7 +34,15 @@ func NewUserRepository() *UserRepository {
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
-	_, err := u.client.Collection("users").Doc(user.Email).Set(ctx, user)
+	gotUser, err := u.GetUser(ctx, user.Email)
+	if err != nil {
+		return nil, errors.From(err, "failed to get user", errors.CodeFrom(err))
+	}
+	if gotUser != nil {
+		return nil, errors.New("User Account Already Exists", 400)
+	}
+
+	_, err = u.client.Collection("users").Doc(user.Email).Set(ctx, user)
 	if err != nil {
 		return nil, errors.From(err, "failed to create user", 500)
 	}
@@ -66,7 +74,7 @@ func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User
 		return nil, errors.From(err, "failed to get user data", 500)
 	}
 	if !data.Exists() {
-		return nil, errors.From(err, "user not found", 404)
+		return nil, errors.From(err, "User Account Not Found", 404)
 	}
 
 	user := model.User{}

@@ -2,15 +2,13 @@ package linkedin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
+	"github.com/thealamu/linkedinsignin/errors"
 	"net/http"
 	"strings"
 )
-
-var NonExistentProfile = errors.New("No LinkedIn Profile Found")
 
 type (
 	Service interface {
@@ -61,10 +59,10 @@ func New(logger zerolog.Logger, env config.Environment) Service {
 
 func (l *lkd) GetProfile(email string) (GetProfileOutput, error) {
 	l.logger.Debug().Msg("Getting LinkedIn Profile for " + email)
-	return l.getProfile(email, l.token)
+	return l.getProfile(email)
 }
 
-func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
+func (l *lkd) getProfile(email string) (GetProfileOutput, error) {
 	endpoint := "https://eur.loki.delve.office.com/api/v1/linkedin/profiles/full"
 
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
@@ -87,27 +85,27 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 	if resp.StatusCode != http.StatusOK {
 		l.logger.Debug().Msgf("Got Status Code when getting profile: %d", resp.StatusCode)
 		if resp.StatusCode != http.StatusUnauthorized {
-			return GetProfileOutput{}, fmt.Errorf("expected 200, got %d", resp.StatusCode)
+			return GetProfileOutput{}, errors.New(fmt.Sprintf("expected 200, got %d", resp.StatusCode), 500)
 		}
 
 		token, err := l.getToken()
 		if err != nil {
-			return GetProfileOutput{}, err
+			return GetProfileOutput{}, errors.From(err, "failed to get token", 500)
 		}
 		l.token = token
-		// try again once
-		return l.getProfile(email, l.token)
+
+		return l.getProfile(email)
 	}
 	defer resp.Body.Close()
 
 	var payload UserProfileResponse
 	err = json.NewDecoder(resp.Body).Decode(&payload)
 	if err != nil {
-		return GetProfileOutput{}, err
+		return GetProfileOutput{}, errors.From(err, "failed to decode response", 500)
 	}
 
 	if len(payload.Persons) <= 0 {
-		return GetProfileOutput{}, NonExistentProfile
+		return GetProfileOutput{}, errors.New("No LinkedIn Profile Found For That Email", 404)
 	}
 
 	person := payload.Persons[0]
