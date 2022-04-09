@@ -8,6 +8,10 @@ type Error struct {
 	Cause error
 }
 
+func (e Error) Message() string {
+	return e.Msg
+}
+
 func (e Error) Error() string {
 	return fmt.Sprintf("%s: %s", e.Msg, e.cause())
 }

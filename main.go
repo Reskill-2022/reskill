@@ -20,7 +20,7 @@ func main() {
 		appLogger.Fatal().Err(err).Msg("Failed to load configs")
 	}
 
-	cts := controllers.NewContainer()
+	cts := controllers.NewContainer(appLogger)
 	rc := repository.NewContainer()
 	service := linkedin.New(appLogger, env)
 

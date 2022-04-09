@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/model"
@@ -10,10 +11,12 @@ import (
 	"net/http"
 )
 
-type UserController struct{}
+type UserController struct {
+	logger zerolog.Logger
+}
 
-func NewUserController() *UserController {
-	return &UserController{}
+func NewUserController(logger zerolog.Logger) *UserController {
+	return &UserController{logger}
 }
 
 func (u *UserController) CreateUser(userCreator repository.UserCreator, service linkedin.Service) echo.HandlerFunc {
@@ -24,15 +27,15 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		err := c.Bind(&requestBody)
 		if err != nil {
-			return HandleError(c, errors.From(err, "Invalid JSON Request Body", 400), http.StatusBadRequest)
+			return u.HandleError(c, errors.From(err, "Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
 		profile, err := service.GetProfile(requestBody.Email)
 		if err != nil {
-			return HandleError(c, errors.From(err, "Failed to Get user profile from LinkedIn", errors.CodeFrom(err)), http.StatusBadRequest)
+			return u.HandleError(c, errors.From(err, "Failed to Get user profile from LinkedIn", errors.CodeFrom(err)), http.StatusBadRequest)
 		}
 
-		u := model.User{
+		data := model.User{
 			Email:       requestBody.Email,
 			Name:        profile.Name,
 			LinkedInURL: profile.ProfileURL,
@@ -40,9 +43,9 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			Phone:       profile.Phone,
 		}
 
-		user, err := userCreator.CreateUser(ctx, u)
+		user, err := userCreator.CreateUser(ctx, data)
 		if err != nil {
-			return HandleError(c, err, errors.CodeFrom(err))
+			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusCreated)
@@ -57,12 +60,12 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 
 		err := c.Bind(&requestBody)
 		if err != nil {
-			return HandleError(c, err, http.StatusBadRequest)
+			return u.HandleError(c, err, http.StatusBadRequest)
 		}
 
 		update, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
-			return HandleError(c, err, errors.CodeFrom(err))
+			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		{
@@ -109,7 +112,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
-			return HandleError(c, err, errors.CodeFrom(err))
+			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)
@@ -122,7 +125,7 @@ func (u *UserController) GetUser(userGetter repository.UserGetter) echo.HandlerF
 
 		user, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
-			return HandleError(c, err, errors.CodeFrom(err))
+			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)

@@ -96,7 +96,6 @@ func (l *lkd) getProfile(email, token string) (GetProfileOutput, error) {
 		}
 		l.token = token
 		// try again once
-		l.logger.Debug().Msgf("Retrying with new token: %s", l.token)
 		return l.getProfile(email, l.token)
 	}
 	defer resp.Body.Close()
