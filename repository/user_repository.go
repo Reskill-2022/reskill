@@ -1,43 +1,79 @@
 package repository
 
 import (
+	"cloud.google.com/go/firestore"
 	"context"
-	"fmt"
+	firebase "firebase.google.com/go"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/model"
+	"google.golang.org/api/option"
+	"log"
 )
 
 type UserRepository struct {
-	data map[string]*model.User
+	client *firestore.Client
 }
 
 var _ UserRepositoryInterface = (*UserRepository)(nil)
 
 func NewUserRepository() *UserRepository {
-	return &UserRepository{
-		data: make(map[string]*model.User),
+	ctx := context.Background()
+
+	sa := option.WithCredentialsFile("./service-account.json")
+	app, err := firebase.NewApp(ctx, nil, sa)
+	if err != nil {
+		log.Fatalln(err)
 	}
+
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return &UserRepository{client}
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
-	if _, ok := u.data[user.Email]; ok {
-		return nil, errors.New(fmt.Sprintf("User with email %s already exists", user.Email), 400)
+	_, err := u.client.Collection("users").Doc(user.Email).Set(ctx, user)
+	if err != nil {
+		return nil, errors.From(err, "failed to create user", 500)
 	}
-	u.data[user.Email] = &user
 	return &user, nil
 }
 
 func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*model.User, error) {
-	if _, ok := u.data[user.Email]; !ok {
-		return nil, errors.New(fmt.Sprintf("User with email %s does not exist", user.Email), 400)
+	_, err := u.client.Collection("users").Doc(user.Email).Update(ctx, []firestore.Update{
+		{Path: "representation", Value: user.Representation},
+		{Path: "gender", Value: user.Gender},
+		{Path: "age_group", Value: user.AgeGroup},
+		{Path: "employment_status", Value: user.EmploymentStatus},
+		{Path: "highest_school", Value: user.HighestSchool},
+		{Path: "can_work_in_usa", Value: user.CanWorkInUSA},
+		{Path: "learning_track", Value: user.LearningTrack},
+		{Path: "tech_experience", Value: user.TechExperience},
+		{Path: "hours_per_week", Value: user.HoursPerWeek},
+		{Path: "referral", Value: user.Referral},
+	})
+	if err != nil {
+		return nil, errors.From(err, "failed to update user data", 500)
 	}
-	u.data[user.Email] = &user
 	return &user, nil
 }
 
 func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User, error) {
-	if _, ok := u.data[email]; !ok {
-		return nil, errors.New(fmt.Sprintf("User with email %s does not exist", email), 400)
+	data, err := u.client.Collection("users").Doc(email).Get(ctx)
+	if err != nil {
+		return nil, errors.From(err, "failed to get user data", 500)
 	}
-	return u.data[email], nil
+	if !data.Exists() {
+		return nil, errors.From(err, "user not found", 404)
+	}
+
+	user := model.User{}
+	err = data.DataTo(&user)
+	if err != nil {
+		return nil, errors.From(err, "failed to get user data", 500)
+	}
+
+	return &user, nil
 }
