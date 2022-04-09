@@ -21,7 +21,7 @@ func main() {
 	}
 
 	cts := controllers.NewContainer(appLogger)
-	rc := repository.NewContainer()
+	rc := repository.NewContainer(appLogger)
 	service := linkedin.New(appLogger, env)
 
 	if err := server.Start(appLogger, env, cts, rc, service); err != nil {

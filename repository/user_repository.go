@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	firebase "firebase.google.com/go"
+	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/model"
 	"google.golang.org/api/option"
@@ -11,12 +12,13 @@ import (
 )
 
 type UserRepository struct {
+	logger zerolog.Logger
 	client *firestore.Client
 }
 
 var _ UserRepositoryInterface = (*UserRepository)(nil)
 
-func NewUserRepository() *UserRepository {
+func NewUserRepository(logger zerolog.Logger) *UserRepository {
 	ctx := context.Background()
 
 	sa := option.WithCredentialsFile("./service-account.json")
@@ -30,10 +32,12 @@ func NewUserRepository() *UserRepository {
 		log.Fatalln(err)
 	}
 
-	return &UserRepository{client}
+	return &UserRepository{logger, client}
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
+	u.logger.Debug().Msgf("Firestore: creating user with email: %s", user.Email)
+
 	gotUser, err := u.GetUser(ctx, user.Email)
 	if err != nil {
 		return nil, errors.From(err, "failed to get user", errors.CodeFrom(err))
@@ -50,6 +54,8 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 }
 
 func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*model.User, error) {
+	u.logger.Debug().Msgf("Firestore: updating user with email: %s", user.Email)
+
 	_, err := u.client.Collection("users").Doc(user.Email).Update(ctx, []firestore.Update{
 		{Path: "representation", Value: user.Representation},
 		{Path: "gender", Value: user.Gender},
@@ -69,6 +75,8 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 }
 
 func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User, error) {
+	u.logger.Debug().Msgf("Firestore: getting user with email: %s", email)
+
 	data, err := u.client.Collection("users").Doc(email).Get(ctx)
 	if err != nil {
 		return nil, errors.From(err, "failed to get user data", 500)
