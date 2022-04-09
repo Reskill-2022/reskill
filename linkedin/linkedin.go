@@ -20,12 +20,13 @@ type (
 	}
 
 	GetProfileOutput struct {
-		Email      string
-		Name       string
-		Photo      string
-		ProfileURL string
-		Location   string
-		Phone      string
+		Email         string
+		Name          string
+		Photo         string
+		ProfileURL    string
+		Location      string
+		Phone         string
+		HasExperience bool
 	}
 
 	UserProfileResponse struct {
@@ -110,12 +111,13 @@ func (l *lkd) getProfile(email string) (GetProfileOutput, error) {
 
 	person := payload.Persons[0]
 	return GetProfileOutput{
-		Email:      email,
-		Name:       person.DisplayName,
-		Photo:      person.PhotoURL,
-		Location:   person.Location,
-		ProfileURL: person.LinkedInURL,
-		Phone:      firstOrEmpty(person.PhoneNumbers),
+		Email:         email,
+		Name:          person.DisplayName,
+		Photo:         person.PhotoURL,
+		Location:      person.Location,
+		ProfileURL:    person.LinkedInURL,
+		Phone:         firstOrEmpty(person.PhoneNumbers),
+		HasExperience: len(person.Positions.PositionHistory) > 0,
 	}, nil
 }
 
