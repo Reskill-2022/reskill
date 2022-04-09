@@ -9,6 +9,7 @@ import (
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/requests"
 	"net/http"
+	"strings"
 )
 
 type UserController struct {
@@ -30,7 +31,9 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			return u.HandleError(c, errors.New("Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
-		profile, err := service.GetProfile(requestBody.Email)
+		userEmail := strings.ToLower(requestBody.Email)
+
+		profile, err := service.GetProfile(userEmail)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
@@ -53,7 +56,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		}
 
 		data := model.User{
-			Email:       requestBody.Email,
+			Email:       userEmail,
 			Name:        profile.Name,
 			LinkedInURL: profile.ProfileURL,
 			Location:    profile.Location,
