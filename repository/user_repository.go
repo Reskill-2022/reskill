@@ -39,10 +39,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 	u.logger.Debug().Msgf("Firestore: creating user with email: %s", user.Email)
 
 	gotUser, err := u.GetUser(ctx, user.Email)
-	if err != nil {
-		return nil, errors.From(err, "failed to get user", errors.CodeFrom(err))
-	}
-	if gotUser != nil {
+	if err == nil || gotUser != nil {
 		return nil, errors.New("User Account Already Exists", 400)
 	}
 
@@ -79,16 +76,13 @@ func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User
 
 	data, err := u.client.Collection("users").Doc(email).Get(ctx)
 	if err != nil {
-		return nil, errors.From(err, "failed to get user data", 500)
-	}
-	if !data.Exists() {
 		return nil, errors.From(err, "User Account Not Found", 404)
 	}
 
 	user := model.User{}
 	err = data.DataTo(&user)
 	if err != nil {
-		return nil, errors.From(err, "failed to get user data", 500)
+		return nil, errors.From(err, "failed to bind user data", 500)
 	}
 
 	return &user, nil
