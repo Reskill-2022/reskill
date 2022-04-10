@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/errors"
@@ -9,7 +8,6 @@ import (
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/requests"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -75,11 +73,12 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
-		var requestBody requests.UpdateUserRequest
-		bytes, err := ioutil.ReadAll(c.Request().Body)
-		fmt.Println(string(bytes))
+		// dump request headers
+		u.logger.Debug().Msgf("Request Headers: %+v", c.Request().Header)
 
-		err = c.Bind(&requestBody)
+		var requestBody requests.UpdateUserRequest
+
+		err := c.Bind(&requestBody)
 		if err != nil {
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
