@@ -52,14 +52,14 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
 		}
 
-		country := profile.Location
-		i := strings.LastIndex(profile.Location, ",")
-		if i > 0 {
-			country = profile.Location[i+2:]
-		}
-		if country != "United States" {
-			return u.HandleError(c, errors.New("Invalid Profile. For United States Only", 400), http.StatusBadRequest)
-		}
+		//country := profile.Location
+		//i := strings.LastIndex(profile.Location, ",")
+		//if i > 0 {
+		//	country = profile.Location[i+2:]
+		//}
+		//if country != "United States" {
+		//	return u.HandleError(c, errors.New("Invalid Profile. For United States Only", 400), http.StatusBadRequest)
+		//}
 
 		data := model.User{
 			Email:       userEmail,
