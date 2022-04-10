@@ -79,6 +79,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		if err != nil {
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
+		u.logger.Debug().Msgf("%+v", requestBody)
 
 		update, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
