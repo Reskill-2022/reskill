@@ -96,6 +96,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
+		if update.Enrolled {
+			return u.HandleError(c, errors.New("User Already Enrolled", 400), http.StatusBadRequest)
+		}
 
 		{
 			if requestBody.Representation != "" {
@@ -139,6 +142,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 		}
 
+		update.Enrolled = true
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
