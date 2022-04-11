@@ -15,6 +15,7 @@ type User struct {
 	AgeGroup         string `json:"age_group" firestore:"age_group"`
 	EmploymentStatus string `json:"employment_status" firestore:"employment_status"`
 	HighestSchool    string `json:"highest_school" firestore:"highest_school"`
+	OptionalMajor    string `json:"optional_major" firestore:"optional_major"`
 	CanWorkInUSA     string `json:"can_work_in_usa" firestore:"can_work_in_usa"`
 	LearningTrack    string `json:"learning_track" firestore:"learning_track"`
 	TechExperience   string `json:"tech_experience" firestore:"tech_experience"`

@@ -59,6 +59,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "age_group", Value: user.AgeGroup},
 		{Path: "employment_status", Value: user.EmploymentStatus},
 		{Path: "highest_school", Value: user.HighestSchool},
+		{Path: "optional_major", Value: user.OptionalMajor},
 		{Path: "can_work_in_usa", Value: user.CanWorkInUSA},
 		{Path: "learning_track", Value: user.LearningTrack},
 		{Path: "tech_experience", Value: user.TechExperience},

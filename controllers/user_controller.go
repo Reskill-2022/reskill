@@ -140,6 +140,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.Referral != "" {
 				update.Referral = requestBody.Referral
 			}
+
+			if requestBody.OptionalMajor != "" {
+				update.OptionalMajor = requestBody.OptionalMajor
+			}
 		}
 
 		update.Enrolled = true
