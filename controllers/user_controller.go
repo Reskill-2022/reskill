@@ -101,47 +101,58 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		}
 
 		{
-			if requestBody.Representation != "" {
-				update.Representation = requestBody.Representation
+			if requestBody.Representation == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Representation is required", 400), http.StatusBadRequest)
 			}
+			update.Representation = requestBody.Representation
 
-			if requestBody.Gender != "" {
-				update.Gender = requestBody.Gender
+			if requestBody.Gender == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Gender is required", 400), http.StatusBadRequest)
 			}
+			update.Gender = requestBody.Gender
 
-			if requestBody.AgeGroup != "" {
-				update.AgeGroup = requestBody.AgeGroup
+			if requestBody.AgeGroup == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Age Group is required", 400), http.StatusBadRequest)
 			}
+			update.AgeGroup = requestBody.AgeGroup
 
-			if requestBody.EmploymentStatus != "" {
-				update.EmploymentStatus = requestBody.EmploymentStatus
+			if requestBody.EmploymentStatus == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Employment Status is required", 400), http.StatusBadRequest)
 			}
+			update.EmploymentStatus = requestBody.EmploymentStatus
 
-			if requestBody.HighestSchool != "" {
-				update.HighestSchool = requestBody.HighestSchool
+			if requestBody.HighestSchool == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose Highest Education", 400), http.StatusBadRequest)
 			}
+			update.HighestSchool = requestBody.HighestSchool
 
-			if requestBody.CanWorkInUSA != "" {
-				update.CanWorkInUSA = requestBody.CanWorkInUSA
+			if requestBody.CanWorkInUSA == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose if you can work in USA", 400), http.StatusBadRequest)
 			}
+			update.CanWorkInUSA = requestBody.CanWorkInUSA
 
-			if requestBody.LearningTrack != "" {
-				update.LearningTrack = requestBody.LearningTrack
+			if requestBody.LearningTrack == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose a Learning Track", 400), http.StatusBadRequest)
 			}
+			update.LearningTrack = requestBody.LearningTrack
 
-			if requestBody.TechExperience != "" {
-				update.TechExperience = requestBody.TechExperience
+			if requestBody.TechExperience == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please specify Tech Experience", 400), http.StatusBadRequest)
 			}
+			update.TechExperience = requestBody.TechExperience
 
-			if requestBody.HoursPerWeek != "" {
-				update.HoursPerWeek = requestBody.HoursPerWeek
+			if requestBody.HoursPerWeek == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose Hours available Per Week", 400), http.StatusBadRequest)
 			}
+			update.HoursPerWeek = requestBody.HoursPerWeek
 
-			if requestBody.Referral != "" {
-				update.Referral = requestBody.Referral
+			if requestBody.Referral == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose your Referral", 400), http.StatusBadRequest)
 			}
+			update.Referral = requestBody.Referral
 
 			if requestBody.OptionalMajor != "" {
+				// major is optional
 				update.OptionalMajor = requestBody.OptionalMajor
 			}
 		}
