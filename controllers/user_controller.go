@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/errors"
@@ -8,6 +10,7 @@ import (
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/requests"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -87,7 +90,17 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 
 		var requestBody requests.UpdateUserRequest
 
-		err := c.Bind(&requestBody)
+		// dump request body
+		var body bytes.Buffer
+		_, err := io.Copy(&body, c.Request().Body)
+		if err != nil {
+			u.logger.Debug().Msgf("Error reading request body: %s", err)
+		}
+
+		cp := body.Bytes()
+		u.logger.Debug().Msgf("Request Body: %s", cp)
+
+		err = json.NewDecoder(bytes.NewReader(cp)).Decode(&requestBody)
 		if err != nil {
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
