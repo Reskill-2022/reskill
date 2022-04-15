@@ -37,6 +37,9 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		}
 
 		userEmail := strings.ToLower(requestBody.Email)
+		if userEmail == "" {
+			return u.HandleError(c, errors.New("Email is required", 400), http.StatusBadRequest)
+		}
 
 		profile, err := service.GetProfile(userEmail)
 		if err != nil {
@@ -193,7 +196,12 @@ func (u *UserController) GetUser(userGetter repository.UserGetter) echo.HandlerF
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
-		user, err := userGetter.GetUser(ctx, c.Param("email"))
+		userEmail := c.Param("email")
+		if userEmail == "" {
+			return u.HandleError(c, errors.New(" Email is required", 400), http.StatusBadRequest)
+		}
+
+		user, err := userGetter.GetUser(ctx, userEmail)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
