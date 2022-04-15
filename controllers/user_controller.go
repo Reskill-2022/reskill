@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type UserController struct {
@@ -71,6 +72,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			LinkedInURL: profile.ProfileURL,
 			Location:    profile.Location,
 			Phone:       profile.Phone,
+			CreatedAt:   time.Now().UTC().String(),
 		}
 
 		user, err := userCreator.CreateUser(ctx, data)

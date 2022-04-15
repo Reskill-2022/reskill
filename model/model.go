@@ -23,5 +23,6 @@ type User struct {
 	Referral         string `json:"referral" firestore:"referral"`
 
 	// Meta
-	Enrolled bool `json:"enrolled" firestore:"enrolled"`
+	Enrolled  bool   `json:"enrolled" firestore:"enrolled"`
+	CreatedAt string `json:"created_at" firestore:"created_at"`
 }
