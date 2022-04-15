@@ -171,7 +171,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 		}
 
-		update.Enrolled = false //todo: change to true
+		update.Enrolled = true
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))

@@ -37,9 +37,9 @@ func New(ctx context.Context, logger zerolog.Logger) (*sesEmailer, error) {
 }
 
 func (s *sesEmailer) Welcome(ctx context.Context, user *model.User) error {
-	s.logger.Info().Msgf("Sending welcome email to '%s", user.Email)
+	s.logger.Info().Msgf("Sending welcome email to '%s'", user.Email)
 
-	payload := fmt.Sprintf(`{\"name\": \"%s\"}`, user.Name)
+	payload := fmt.Sprintf(`{"name": "%s"}`, user.Name)
 
 	dst := types.Destination{
 		ToAddresses: []string{user.Email},
@@ -55,5 +55,5 @@ func (s *sesEmailer) Welcome(ctx context.Context, user *model.User) error {
 		return fmt.Errorf("failed to send email: %w", err)
 	}
 
-	return fmt.Errorf("not implemented")
+	return nil
 }
