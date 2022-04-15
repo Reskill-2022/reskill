@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/controllers"
+	"github.com/thealamu/linkedinsignin/email"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/repository"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 	"time"
 )
 
-func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Container, service linkedin.Service) {
+func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Container, service linkedin.Service, emailer email.Emailer) {
 	e.Use(middleware.Logger())
 	// allow all origins
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -32,15 +33,15 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Con
 		users := api.Group("/users")
 
 		users.POST("", cts.UserController.CreateUser(rc.UserRepository, service))
-		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository, rc.UserRepository))
+		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository, rc.UserRepository, emailer))
 		users.GET("/:email", cts.UserController.GetUser(rc.UserRepository))
 	}
 }
 
-func Start(logger zerolog.Logger, env config.Environment, cts *controllers.Container, rc *repository.Container, service linkedin.Service) error {
+func Start(logger zerolog.Logger, env config.Environment, cts *controllers.Container, rc *repository.Container, service linkedin.Service, emailer email.Emailer) error {
 	e := echo.New()
 
-	registerRoutes(e, cts, rc, service)
+	registerRoutes(e, cts, rc, service, emailer)
 
 	srv := &http.Server{
 		ReadTimeout:  10 * time.Second,

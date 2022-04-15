@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
+	"github.com/thealamu/linkedinsignin/email"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/model"
@@ -81,7 +82,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 	}
 }
 
-func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdater repository.UserUpdater) echo.HandlerFunc {
+func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdater repository.UserUpdater, emailer email.Emailer) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 
@@ -174,6 +175,12 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
+		}
+
+		// welcome the user
+		err = emailer.Welcome(ctx, user)
+		if err != nil {
+			u.logger.Err(err).Msgf("Failed to send welcome email to %v", user.Email)
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)
