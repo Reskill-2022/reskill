@@ -171,7 +171,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 		}
 
-		update.Enrolled = true
+		update.Enrolled = false //todo: change to true
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
@@ -180,7 +180,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		// welcome the user
 		err = emailer.Welcome(ctx, user)
 		if err != nil {
-			u.logger.Err(err).Msgf("Failed to send welcome email to %v", user.Email)
+			u.logger.Err(err).Msgf("Failed to send welcome email to '%s'", user.Email)
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)
