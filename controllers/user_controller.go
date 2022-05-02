@@ -121,10 +121,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
 
-		if strings.Title(requestBody.CanWorkInUSA) != "Yes" {
-			return u.HandleError(c, errors.New("It is Required that You can Work in the USA", 400), http.StatusBadRequest)
-		}
-
 		update, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
@@ -134,6 +130,16 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		}
 
 		{
+			if requestBody.Timezone == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Timezone is required", 400), http.StatusBadRequest)
+			}
+			update.Timezone = requestBody.Timezone
+
+			if requestBody.Phone == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Phone Number is required", 400), http.StatusBadRequest)
+			}
+			update.Phone = requestBody.Phone
+
 			if requestBody.Representation == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Representation is required", 400), http.StatusBadRequest)
 			}
@@ -161,6 +167,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 
 			if requestBody.CanWorkInUSA == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose if you can work in USA", 400), http.StatusBadRequest)
+			}
+			if strings.Title(requestBody.CanWorkInUSA) != "Yes" {
+				return u.HandleError(c, errors.New("It is Required that You can Work in the USA", 400), http.StatusBadRequest)
 			}
 			update.CanWorkInUSA = requestBody.CanWorkInUSA
 

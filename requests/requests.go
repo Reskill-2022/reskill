@@ -6,6 +6,8 @@ type (
 	}
 
 	UpdateUserRequest struct {
+		Timezone         string `json:"timezone"`
+		Phone            string `json:"phone"`
 		Representation   string `json:"representation"`
 		Gender           string `json:"gender"`
 		AgeGroup         string `json:"age_group"`
