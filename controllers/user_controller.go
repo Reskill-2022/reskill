@@ -121,6 +121,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
 
+		if strings.Title(requestBody.CanWorkInUSA) != "Yes" {
+			return u.HandleError(c, errors.New("It is Required that You can Work in the USA", 400), http.StatusBadRequest)
+		}
+
 		update, err := userGetter.GetUser(ctx, c.Param("email"))
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
