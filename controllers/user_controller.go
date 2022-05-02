@@ -79,9 +79,13 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		//	return u.HandleError(c, errors.New("Invalid Profile. For United States Only", 400), http.StatusBadRequest)
 		//}
 
+		firstname, lastname := u.splitNames(profile.Name)
+
 		data := model.User{
 			Email:       userEmail,
 			Name:        profile.Name,
+			FirstName:   firstname,
+			LastName:    lastname,
 			LinkedInURL: profile.ProfileURL,
 			Location:    profile.Location,
 			Phone:       profile.Phone,
@@ -231,4 +235,12 @@ func (u *UserController) GetUser(userGetter repository.UserGetter) echo.HandlerF
 
 		return HandleSuccess(c, user, http.StatusOK)
 	}
+}
+
+func (u *UserController) splitNames(name string) (string, string) {
+	names := strings.Split(name, " ")
+	if len(names) == 1 {
+		return names[0], ""
+	}
+	return names[0], names[len(names)-1]
 }

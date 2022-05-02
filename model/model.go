@@ -8,6 +8,8 @@ type User struct {
 	Location    string `json:"location" firestore:"location"`
 	Timezone    string `json:"timezone" firestore:"timezone"`
 	Phone       string `json:"phone" firestore:"phone"`
+	FirstName   string `json:"first_name" firestore:"first_name"`
+	LastName    string `json:"last_name" firestore:"last_name"`
 
 	// Extras
 	Representation   string `json:"representation" firestore:"representation"`
