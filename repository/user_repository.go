@@ -66,6 +66,8 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "hours_per_week", Value: user.HoursPerWeek},
 		{Path: "referral", Value: user.Referral},
 		{Path: "enrolled", Value: user.Enrolled},
+		{Path: "timezone", Value: user.Timezone},
+		{Path: "phone", Value: user.Phone},
 	})
 	if err != nil {
 		return nil, errors.From(err, "failed to update user data", 500)
