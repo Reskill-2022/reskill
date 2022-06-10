@@ -3,3 +3,4 @@ tmp/
 secrets/
 service-account.json
 .DS_Store
+.env

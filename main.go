@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/controllers"
@@ -9,7 +13,6 @@ import (
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/server"
-	"os"
 )
 
 var defaultWriter = zerolog.ConsoleWriter{Out: os.Stdout}
@@ -18,6 +21,11 @@ func main() {
 	ctx := context.Background()
 
 	appLogger := zerolog.New(defaultWriter).With().Timestamp().Logger()
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	env, err := config.New()
 	if err != nil {
