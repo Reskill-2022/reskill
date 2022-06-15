@@ -3,6 +3,11 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/email"
@@ -11,10 +16,6 @@ import (
 	"github.com/thealamu/linkedinsignin/model"
 	"github.com/thealamu/linkedinsignin/repository"
 	"github.com/thealamu/linkedinsignin/requests"
-	"io"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type UserController struct {
@@ -196,6 +197,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				return u.HandleError(c, errors.New("Missing Fields! Please choose your Referral", 400), http.StatusBadRequest)
 			}
 			update.Referral = requestBody.Referral
+
+			if requestBody.ReferralOther != "" {
+				// referralOther is optional
+				update.ReferralOther = requestBody.ReferralOther
+			}
 
 			if requestBody.OptionalMajor != "" {
 				// major is optional

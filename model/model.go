@@ -23,6 +23,7 @@ type User struct {
 	TechExperience   string `json:"tech_experience" firestore:"tech_experience"`
 	HoursPerWeek     string `json:"hours_per_week" firestore:"hours_per_week"`
 	Referral         string `json:"referral" firestore:"referral"`
+	ReferralOther    string `json:"referral_other" firestore:"referral_other"`
 
 	// Meta
 	Enrolled  bool   `json:"enrolled" firestore:"enrolled"`

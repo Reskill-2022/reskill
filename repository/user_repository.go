@@ -1,14 +1,15 @@
 package repository
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
+	"log"
+
+	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/model"
 	"google.golang.org/api/option"
-	"log"
 )
 
 type UserRepository struct {
@@ -65,6 +66,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "tech_experience", Value: user.TechExperience},
 		{Path: "hours_per_week", Value: user.HoursPerWeek},
 		{Path: "referral", Value: user.Referral},
+		{Path: "referral_other", Value: user.ReferralOther},
 		{Path: "enrolled", Value: user.Enrolled},
 		{Path: "timezone", Value: user.Timezone},
 		{Path: "phone", Value: user.Phone},

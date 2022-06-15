@@ -19,5 +19,6 @@ type (
 		TechExperience   string `json:"tech_experience"`
 		HoursPerWeek     string `json:"hours_per_week"`
 		Referral         string `json:"referral"`
+		ReferralOther    string `json:"referral_other"`
 	}
 )
