@@ -199,6 +199,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.Referral = requestBody.Referral
 
+			if requestBody.Photo == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please upload a picture", 400), http.StatusBadRequest)
+			}
+			update.Photo = requestBody.Photo
+
 			if requestBody.ReferralOther != "" {
 				// referralOther is optional
 				update.ReferralOther = requestBody.ReferralOther
@@ -207,11 +212,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.OptionalMajor != "" {
 				// major is optional
 				update.OptionalMajor = requestBody.OptionalMajor
-			}
-
-			if requestBody.Photo != "" {
-				// photo is optional
-				update.Photo = requestBody.Photo
 			}
 		}
 
