@@ -208,6 +208,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				// major is optional
 				update.OptionalMajor = requestBody.OptionalMajor
 			}
+
+			if requestBody.Photo != "" {
+				// photo is optional
+				update.Photo = requestBody.Photo
+			}
 		}
 
 		update.Enrolled = true

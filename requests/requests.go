@@ -20,5 +20,6 @@ type (
 		HoursPerWeek     string `json:"hours_per_week"`
 		Referral         string `json:"referral"`
 		ReferralOther    string `json:"referral_other"`
+		Photo            string `json:"photo"`
 	}
 )
