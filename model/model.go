@@ -27,6 +27,10 @@ type User struct {
 	ReferralOther    string `json:"referral_other" firestore:"referral_other"`
 
 	// Meta
-	Enrolled  bool   `json:"enrolled" firestore:"enrolled"`
-	CreatedAt string `json:"created_at" firestore:"created_at"`
+	Enrolled     bool   `json:"enrolled" firestore:"enrolled"`
+	CreatedAt    string `json:"created_at" firestore:"created_at"`
+	GitAccount   string `json:"gitaccount" firestore:"gitaccount"`
+	FigmaAccount string `json:"figmaaccount" firestore:"figmaaccount"`
+	GitYes       string `json:"git_yes" firestore:"git_yes"`
+	FigmaYes     string `json:"figma_yes" firestore:"figma_yes"`
 }

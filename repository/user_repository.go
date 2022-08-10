@@ -71,6 +71,10 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "timezone", Value: user.Timezone},
 		{Path: "phone", Value: user.Phone},
 		{Path: "photo", Value: user.Photo},
+		{Path: "gitaccount", Value: user.GitAccount},
+		{Path: "figmaaccount", Value: user.FigmaAccount},
+		{Path: "git_yes", Value: user.GitYes},
+		{Path: "figma_yes", Value: user.FigmaYes},
 	})
 	if err != nil {
 		return nil, errors.From(err, "failed to update user data", 500)
