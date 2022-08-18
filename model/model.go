@@ -25,6 +25,8 @@ type User struct {
 	HoursPerWeek     string `json:"hours_per_week" firestore:"hours_per_week"`
 	Referral         string `json:"referral" firestore:"referral"`
 	ReferralOther    string `json:"referral_other" firestore:"referral_other"`
+	City             string `json:"city" firestore:"city"`
+	State            string `json:"state" firestore:"state"`
 
 	// Meta
 	Enrolled     bool   `json:"enrolled" firestore:"enrolled"`

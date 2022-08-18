@@ -212,6 +212,14 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				// major is optional
 				update.OptionalMajor = requestBody.OptionalMajor
 			}
+
+			if requestBody.City != "" {
+				update.City = requestBody.City
+			}
+
+			if requestBody.State != "" {
+				update.State = requestBody.State
+			}
 		}
 
 		update.Enrolled = true

@@ -21,5 +21,7 @@ type (
 		Referral         string `json:"referral"`
 		ReferralOther    string `json:"referral_other"`
 		Photo            string `json:"photo"`
+		City             string `json:"city"`
+		State            string `json:"state"`
 	}
 )
