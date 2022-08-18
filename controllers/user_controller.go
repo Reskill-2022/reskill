@@ -136,10 +136,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		}
 
 		{
-			if requestBody.Timezone == "" {
-				return u.HandleError(c, errors.New("Missing Fields! City and State required", 400), http.StatusBadRequest)
+			if requestBody.Timezone != "" {
+				update.Timezone = requestBody.Timezone
 			}
-			update.Timezone = requestBody.Timezone
 
 			if requestBody.Phone == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Phone Number is required", 400), http.StatusBadRequest)
