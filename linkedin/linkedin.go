@@ -83,6 +83,18 @@ type (
 			DisplayImage string `json:"displayImage"`
 		} `json:"profilePicture"`
 	}
+
+	PhotoResponse struct {
+		ProfilePicture struct {
+			DisplayImage struct {
+				Elements []struct {
+					Identifiers []struct {
+						Identifier string `json:"identifier"`
+					}
+				} `json:"elements"`
+			} `json:"displayImage~"`
+		} `json:"profilePicture"`
+	}
 )
 
 func New(logger zerolog.Logger, env config.Environment) Service {
@@ -158,11 +170,56 @@ func (l *lkd) getProfileNew(authCode, redirectURI string) (*GetProfileOutput, er
 		return nil, err
 	}
 
+	convPicture, err := getPhoto(picture, payload.AccessToken)
+	if err != nil {
+		l.logger.Debug().Msg(err.Error())
+	}
+
+	if convPicture != "" {
+		picture = convPicture
+	}
+
 	return &GetProfileOutput{
 		Email: email,
 		Name:  fname + " " + lname,
 		Photo: picture,
 	}, nil
+}
+
+func getPhoto(urn, token string) (string, error) {
+	endpoint := "https://api.linkedin.com/v2/me?projection=(id,profilePicture(displayImage~digitalmediaAsset:playableStreams))"
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to build request")
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to do request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get access token, not ok")
+	}
+	defer resp.Body.Close()
+
+	var payload PhotoResponse
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return "", fmt.Errorf("failed to unmarshal response body")
+	}
+
+	if len(payload.ProfilePicture.DisplayImage.Elements) == 0 {
+		return "", nil
+	}
+	if len(payload.ProfilePicture.DisplayImage.Elements[0].Identifiers) == 0 {
+		return "", nil
+	}
+
+	lenIdentifiers := len(payload.ProfilePicture.DisplayImage.Elements[0].Identifiers)
+	// return last identifier
+	return payload.ProfilePicture.DisplayImage.Elements[0].Identifiers[lenIdentifiers-1].Identifier, nil
 }
 
 func getUserProfile(token string) (string, string, string, error) {
