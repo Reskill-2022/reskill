@@ -47,12 +47,20 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			return u.HandleError(c, errors.New("Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
-		userEmail := strings.ToLower(requestBody.Email)
-		if userEmail == "" {
-			return u.HandleError(c, errors.New("Email is required", 400), http.StatusBadRequest)
+		authCode := requestBody.AuthCode
+		if authCode == "" {
+			return u.HandleError(c, errors.New("Auth Code is required", 400), http.StatusBadRequest)
 		}
+		redirectURI := requestBody.RedirectURI
+		if redirectURI == "" {
+			return u.HandleError(c, errors.New("Redirect URI is required", 400), http.StatusBadRequest)
+		}
+		// userEmail := strings.ToLower(requestBody.Email)
+		// if userEmail == "" {
+		// 	return u.HandleError(c, errors.New("Email is required", 400), http.StatusBadRequest)
+		// }
 
-		profile, err := service.GetProfile(userEmail)
+		profile, err := service.GetProfile(authCode, redirectURI)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
@@ -61,15 +69,15 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		if profile.Name == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Found No Name", 400), http.StatusBadRequest)
 		}
-		if profile.Location == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
-		}
+		// if profile.Location == "" {
+		// 	return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
+		// }
 		if profile.Photo == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture on LinkedIn", 400), http.StatusBadRequest)
 		}
-		if !profile.HasExperience {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
-		}
+		// if !profile.HasExperience {
+		// 	return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
+		// }
 
 		//country := profile.Location
 		//i := strings.LastIndex(profile.Location, ",")
@@ -83,7 +91,7 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		firstname, lastname := u.splitNames(profile.Name)
 
 		data := model.User{
-			Email:       userEmail,
+			Email:       profile.Email,
 			Name:        profile.Name,
 			FirstName:   firstname,
 			LastName:    lastname,

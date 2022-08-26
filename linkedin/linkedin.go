@@ -3,16 +3,27 @@ package linkedin
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+
 	"github.com/rs/zerolog"
+
 	"github.com/thealamu/linkedinsignin/config"
 	"github.com/thealamu/linkedinsignin/errors"
-	"net/http"
-	"strings"
 )
 
 type (
+	AccessTokenResponse struct {
+		AccessToken string `json:"access_token"`
+		ExpiresIn   int    `json:"expires_in"`
+	}
+
 	Service interface {
-		GetProfile(email string) (GetProfileOutput, error)
+		GetProfile(authCode, redirectURI string) (*GetProfileOutput, error)
 	}
 
 	GetProfileInput struct {
@@ -49,23 +60,79 @@ type (
 	}
 
 	lkd struct {
-		logger  zerolog.Logger
-		MSAAUTH string
-		token   string
+		logger       zerolog.Logger
+		MSAAUTH      string
+		token        string
+		clientID     string
+		clientSecret string
 	}
 )
 
 func New(logger zerolog.Logger, env config.Environment) Service {
 	return &lkd{
-		logger:  logger,
-		MSAAUTH: env["MSAAUTH"],
+		logger:       logger,
+		MSAAUTH:      env["MSAAUTH"],
+		clientID:     env["ClientID"],
+		clientSecret: env["ClientSecret"],
 	}
 }
 
-func (l *lkd) GetProfile(email string) (GetProfileOutput, error) {
-	l.logger.Debug().Msg("Getting LinkedIn Profile for " + email)
-	return l.getProfile(email)
+func (l *lkd) GetProfile(authCode, redirectURI string) (*GetProfileOutput, error) {
+	l.logger.Debug().Msg("Getting LinkedIn Profile for")
+	return l.getProfileNew(authCode, redirectURI)
 }
+
+func (l *lkd) getProfileNew(authCode, redirectURI string) (*GetProfileOutput, error) {
+	endpoint := "https://www.linkedin.com/oauth/v2/accessToken"
+
+	data := url.Values{}
+	data.Set("grant_type", "authorization_code")
+	data.Set("code", authCode)
+	data.Set("client_id", l.clientID)
+	data.Set("client_secret", l.clientSecret)
+	data.Set("redirect_uri", redirectURI)
+
+	req, err := http.NewRequest(http.MethodPost, endpoint, strings.NewReader(data.Encode()))
+	if err != nil {
+		l.logger.Err(err).Msg("Failed to create HTTP request")
+		return nil, fmt.Errorf("failed to build request")
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		l.logger.Err(err).Msg("Failed to do request")
+		return nil, fmt.Errorf("failed to get access token")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		l.logger.Err(fmt.Errorf("expected status code 200, got %d", resp.StatusCode)).Msg("Request failed")
+		_, err := io.Copy(os.Stderr, resp.Body)
+		if err != nil {
+			l.logger.Err(err).Msg("Failed to write response error")
+		}
+		// http.Error(w, "Failed to get access token", http.StatusInternalServerError)
+		return nil, fmt.Errorf("failed to get access token, not ok")
+	}
+	defer resp.Body.Close()
+
+	var payload AccessTokenResponse
+
+	rawJSON, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		l.logger.Err(err).Msg("Failed to read response body")
+		return nil, fmt.Errorf("failed to read response body")
+	}
+	err = json.Unmarshal(rawJSON, &payload)
+	if err != nil {
+		l.logger.Err(err).Msg("Failed to unmarshal response body")
+		// http.Error(w, "Failed to get access token", http.StatusInternalServerError)
+		return nil, fmt.Errorf("failed to unmarshal response body")
+	}
+
+}
+
+func getEmail() {}
 
 func (l *lkd) getProfile(email string) (GetProfileOutput, error) {
 	endpoint := "https://eur.loki.delve.office.com/api/v1/linkedin/profiles/full"

@@ -2,7 +2,8 @@ package requests
 
 type (
 	CreateUserRequest struct {
-		Email string `json:"email"`
+		AuthCode    string `json:"code"`
+		RedirectURI string `json:"redirect_uri"`
 	}
 
 	UpdateUserRequest struct {
