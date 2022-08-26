@@ -66,6 +66,23 @@ type (
 		clientID     string
 		clientSecret string
 	}
+
+	EmailResponse struct {
+		Elements []struct {
+			Handle        string `json:"handle"`
+			HandleContent struct {
+				EmailAddress string `json:"emailAddress"`
+			} `json:"handle~"`
+		}
+	}
+
+	ProfileResponse struct {
+		LocalizedLastName  string `json:"localizedLastName"`
+		LocalizedFirstName string `json:"localizedFirstName"`
+		ProfilePicture     struct {
+			DisplayImage string `json:"displayImage"`
+		} `json:"profilePicture"`
+	}
 )
 
 func New(logger zerolog.Logger, env config.Environment) Service {
@@ -130,9 +147,84 @@ func (l *lkd) getProfileNew(authCode, redirectURI string) (*GetProfileOutput, er
 		return nil, fmt.Errorf("failed to unmarshal response body")
 	}
 
+	email, err := getUserEmail(payload.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	fname, lname, picture, err := getUserProfile(payload.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GetProfileOutput{
+		Email: email,
+		Name:  fname + " " + lname,
+		Photo: picture,
+	}, nil
 }
 
-func getEmail() {}
+func getUserProfile(token string) (string, string, string, error) {
+	endpoint := "https://api.linkedin.com/v2/me"
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to build request")
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to do request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", "", "", fmt.Errorf("failed to get access token, not ok")
+	}
+	defer resp.Body.Close()
+
+	var payload ProfileResponse
+	err = json.NewDecoder(resp.Body).Decode(&payload)
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to unmarshal response body")
+	}
+
+	return payload.LocalizedFirstName, payload.LocalizedLastName, payload.ProfilePicture.DisplayImage, nil
+}
+
+func getUserEmail(token string) (string, error) {
+	endpoint := "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))"
+
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	rawJSON, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(string(rawJSON))
+
+	var payload EmailResponse
+	err = json.Unmarshal(rawJSON, &payload)
+	if err != nil {
+		return "", err
+	}
+
+	if len(payload.Elements) <= 0 {
+		return "", fmt.Errorf("got empty email list")
+	}
+
+	return payload.Elements[0].HandleContent.EmailAddress, nil
+}
 
 func (l *lkd) getProfile(email string) (GetProfileOutput, error) {
 	endpoint := "https://eur.loki.delve.office.com/api/v1/linkedin/profiles/full"
