@@ -105,8 +105,8 @@ func (l *lkd) getProfileNew(authCode, redirectURI string) (*GetProfileOutput, er
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", authCode)
-	data.Set("client_id", l.clientID)
-	data.Set("client_secret", l.clientSecret)
+	data.Set("client_id", "77iglwja8hmidg")
+	data.Set("client_secret", "kkJnVaVpstBy1wp0")
 	data.Set("redirect_uri", redirectURI)
 
 	req, err := http.NewRequest(http.MethodPost, endpoint, strings.NewReader(data.Encode()))
@@ -115,6 +115,7 @@ func (l *lkd) getProfileNew(authCode, redirectURI string) (*GetProfileOutput, er
 		return nil, fmt.Errorf("failed to build request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// req.Header.Set("Host", "http://localhost:9000")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
