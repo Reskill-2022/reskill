@@ -41,7 +41,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 
 	gotUser, err := u.GetUser(ctx, user.Email)
 	if err == nil || gotUser != nil {
-		return nil, errors.New("User Account Already Exists", 400)
+		return gotUser, nil
 	}
 
 	_, err = u.client.Collection("users").Doc(user.Email).Set(ctx, user)
