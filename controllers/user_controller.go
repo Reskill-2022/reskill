@@ -228,6 +228,27 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.State != "" {
 				update.State = requestBody.State
 			}
+			if requestBody.ProfessionalExperience != "" {
+				update.ProfessionalExperience = requestBody.ProfessionalExperience
+			}
+			if requestBody.Industries != "" {
+				update.Industries = requestBody.Industries
+			}
+			if requestBody.WillChangeJob != "" {
+				update.WillChangeJob = requestBody.WillChangeJob
+			}
+			if requestBody.WillChangeJobRole != "" {
+				update.WillChangeJobRole = requestBody.WillChangeJobRole
+			}
+			if requestBody.OpenToMeet != "" {
+				update.OpenToMeet = requestBody.OpenToMeet
+			}
+			if requestBody.RacialDemographic != "" {
+				update.RacialDemographic = requestBody.RacialDemographic
+			}
+			if requestBody.PriorKnowledge != "" {
+				update.PriorKnowledge = requestBody.PriorKnowledge
+			}
 		}
 
 		update.Enrolled = true

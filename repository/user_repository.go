@@ -77,6 +77,13 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "figma_yes", Value: user.FigmaYes},
 		{Path: "city", Value: user.City},
 		{Path: "state", Value: user.State},
+		{Path: "professional_experience", Value: user.ProfessionalExperience},
+		{Path: "industries", Value: user.Industries},
+		{Path: "will_change_job", Value: user.WillChangeJob},
+		{Path: "will_change_job_role", Value: user.WillChangeJobRole},
+		{Path: "open_to_meet", Value: user.OpenToMeet},
+		{Path: "racial_demographic", Value: user.RacialDemographic},
+		{Path: "prior_knowledge", Value: user.PriorKnowledge},
 	})
 	if err != nil {
 		return nil, errors.From(err, "failed to update user data", 500)
