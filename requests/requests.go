@@ -7,6 +7,7 @@ type (
 	}
 
 	UpdateUserRequest struct {
+		LinkedInURL            string `json:"linkedin_url"`
 		Timezone               string `json:"timezone"`
 		Phone                  string `json:"phone"`
 		Representation         string `json:"representation"`

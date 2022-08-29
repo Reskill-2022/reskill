@@ -2,17 +2,17 @@ package model
 
 type User struct {
 	// Basic
-	Email       string `json:"email" firestore:"email"`
-	Name        string `json:"name" firestore:"name"`
-	LinkedInURL string `json:"linkedin_url" firestore:"linkedin_url"`
-	Location    string `json:"location" firestore:"location"`
-	Timezone    string `json:"timezone" firestore:"timezone"`
-	Phone       string `json:"phone" firestore:"phone"`
-	FirstName   string `json:"first_name" firestore:"first_name"`
-	LastName    string `json:"last_name" firestore:"last_name"`
-	Photo       string `json:"photo" firestore:"photo"`
+	Email     string `json:"email" firestore:"email"`
+	Name      string `json:"name" firestore:"name"`
+	Location  string `json:"location" firestore:"location"`
+	Timezone  string `json:"timezone" firestore:"timezone"`
+	Phone     string `json:"phone" firestore:"phone"`
+	FirstName string `json:"first_name" firestore:"first_name"`
+	LastName  string `json:"last_name" firestore:"last_name"`
+	Photo     string `json:"photo" firestore:"photo"`
 
 	// Extras
+	LinkedInURL            string `json:"linkedin_url" firestore:"linkedin_url"`
 	Representation         string `json:"representation" firestore:"representation"`
 	Gender                 string `json:"gender" firestore:"gender"`
 	AgeGroup               string `json:"age_group" firestore:"age_group"`

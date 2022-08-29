@@ -148,6 +148,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				update.Timezone = requestBody.Timezone
 			}
 
+			if requestBody.LinkedInURL == "" {
+				return u.HandleError(c, errors.New("Missing Fields! LinkedIn URL is required", 400), http.StatusBadRequest)
+			}
+			update.LinkedInURL = requestBody.LinkedInURL
+
 			if requestBody.Phone == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Phone Number is required", 400), http.StatusBadRequest)
 			}

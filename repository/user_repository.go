@@ -84,6 +84,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "open_to_meet", Value: user.OpenToMeet},
 		{Path: "racial_demographic", Value: user.RacialDemographic},
 		{Path: "prior_knowledge", Value: user.PriorKnowledge},
+		{Path: "linkedin_url", Value: user.LinkedInURL},
 	})
 	if err != nil {
 		return nil, errors.From(err, "failed to update user data", 500)
