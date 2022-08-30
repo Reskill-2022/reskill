@@ -196,10 +196,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.LearningTrack = requestBody.LearningTrack
 
-			if requestBody.TechExperience == "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please specify Tech Experience", 400), http.StatusBadRequest)
+			if requestBody.TechExperience != "" {
+				update.TechExperience = requestBody.TechExperience
 			}
-			update.TechExperience = requestBody.TechExperience
 
 			if requestBody.HoursPerWeek == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose Hours available Per Week", 400), http.StatusBadRequest)
