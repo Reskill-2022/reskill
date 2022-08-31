@@ -54,10 +54,6 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		if redirectURI == "" {
 			return u.HandleError(c, errors.New("Redirect URI is required", 400), http.StatusBadRequest)
 		}
-		// userEmail := strings.ToLower(requestBody.Email)
-		// if userEmail == "" {
-		// 	return u.HandleError(c, errors.New("Email is required", 400), http.StatusBadRequest)
-		// }
 
 		profile, err := service.GetProfile(authCode, redirectURI)
 		if err != nil {
@@ -68,24 +64,10 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		if profile.Name == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Found No Name", 400), http.StatusBadRequest)
 		}
-		// if profile.Location == "" {
-		// 	return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
-		// }
+
 		if profile.Photo == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture on LinkedIn", 400), http.StatusBadRequest)
 		}
-		// if !profile.HasExperience {
-		// 	return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
-		// }
-
-		//country := profile.Location
-		//i := strings.LastIndex(profile.Location, ",")
-		//if i > 0 {
-		//	country = profile.Location[i+2:]
-		//}
-		//if country != "United States" {
-		//	return u.HandleError(c, errors.New("Invalid Profile. For United States Only", 400), http.StatusBadRequest)
-		//}
 
 		firstname, lastname := u.splitNames(profile.Name)
 
@@ -257,12 +239,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
-
-		// welcome the user
-		// err = emailer.Welcome(ctx, user)
-		// if err != nil {
-		// 	u.logger.Err(err).Msgf("Failed to send welcome email to '%s'", user.Email)
-		// }
 
 		return HandleSuccess(c, user, http.StatusOK)
 	}
