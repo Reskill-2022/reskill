@@ -1,15 +1,14 @@
 package controllers
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
+
 	"github.com/thealamu/linkedinsignin/email"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/linkedin"
@@ -33,16 +32,16 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		var requestBody requests.CreateUserRequest
 
 		// dump request body
-		var body bytes.Buffer
-		_, err := io.Copy(&body, c.Request().Body)
-		if err != nil {
-			u.logger.Debug().Msgf("Error reading request body: %s", err)
-		}
+		// var body bytes.Buffer
+		// _, err := io.Copy(&body, c.Request().Body)
+		// if err != nil {
+		// 	u.logger.Debug().Msgf("Error reading request body: %s", err)
+		// }
 
-		cp := body.Bytes()
-		u.logger.Debug().Msgf("Request Body: %s", cp)
+		// cp := body.Bytes()
+		// u.logger.Debug().Msgf("Request Body: %s", cp)
 
-		err = json.NewDecoder(bytes.NewReader(cp)).Decode(&requestBody)
+		err := json.NewDecoder(c.Request().Body).Decode(&requestBody)
 		if err != nil {
 			return u.HandleError(c, errors.New("Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
@@ -121,16 +120,16 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		var requestBody requests.UpdateUserRequest
 
 		// dump request body
-		var body bytes.Buffer
-		_, err := io.Copy(&body, c.Request().Body)
-		if err != nil {
-			u.logger.Debug().Msgf("Error reading request body: %s", err)
-		}
+		// var body bytes.Buffer
+		// _, err := io.Copy(&body, c.Request().Body)
+		// if err != nil {
+		// 	u.logger.Debug().Msgf("Error reading request body: %s", err)
+		// }
 
-		cp := body.Bytes()
-		u.logger.Debug().Msgf("Request Body: %s", cp)
+		// cp := body.Bytes()
+		// u.logger.Debug().Msgf("Request Body: %s", cp)
 
-		err = json.NewDecoder(bytes.NewReader(cp)).Decode(&requestBody)
+		err := json.NewDecoder(c.Request().Body).Decode(&requestBody)
 		if err != nil {
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
@@ -186,7 +185,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.CanWorkInUSA == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose if you can work in USA", 400), http.StatusBadRequest)
 			}
-			if strings.Title(requestBody.CanWorkInUSA) != "Yes" {
+			if strings.ToUpper(requestBody.CanWorkInUSA) != "YES" {
 				return u.HandleError(c, errors.New("It is Required that You can Work in the USA", 400), http.StatusBadRequest)
 			}
 			update.CanWorkInUSA = requestBody.CanWorkInUSA
@@ -195,10 +194,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				return u.HandleError(c, errors.New("Missing Fields! Please choose a Learning Track", 400), http.StatusBadRequest)
 			}
 			update.LearningTrack = requestBody.LearningTrack
-
-			if requestBody.TechExperience != "" {
-				update.TechExperience = requestBody.TechExperience
-			}
 
 			if requestBody.HoursPerWeek == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose Hours available Per Week", 400), http.StatusBadRequest)
@@ -210,10 +205,40 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.Referral = requestBody.Referral
 
-			if requestBody.Photo == "" {
+			if requestBody.Photo == "" || requestBody.Photo == "null" {
 				return u.HandleError(c, errors.New("Missing Fields! Please upload a picture", 400), http.StatusBadRequest)
 			}
 			update.Photo = requestBody.Photo
+
+			if requestBody.City == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please set a City", 400), http.StatusBadRequest)
+			}
+			update.City = requestBody.City
+
+			if requestBody.State == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
+			}
+			update.State = requestBody.State
+
+			if requestBody.ProfessionalExperience == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose a Professional Experience", 400), http.StatusBadRequest)
+			}
+			update.ProfessionalExperience = requestBody.ProfessionalExperience
+
+			if requestBody.Industries != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
+			}
+			update.Industries = requestBody.Industries
+
+			if requestBody.RacialDemographic != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
+			}
+			update.RacialDemographic = requestBody.RacialDemographic
+
+			if requestBody.PriorKnowledge != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
+			}
+			update.PriorKnowledge = requestBody.PriorKnowledge
 
 			if requestBody.ReferralOther != "" {
 				// referralOther is optional
@@ -225,34 +250,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				update.OptionalMajor = requestBody.OptionalMajor
 			}
 
-			if requestBody.City != "" {
-				update.City = requestBody.City
-			}
-
-			if requestBody.State != "" {
-				update.State = requestBody.State
-			}
-			if requestBody.ProfessionalExperience != "" {
-				update.ProfessionalExperience = requestBody.ProfessionalExperience
-			}
-			if requestBody.Industries != "" {
-				update.Industries = requestBody.Industries
-			}
-			if requestBody.WillChangeJob != "" {
-				update.WillChangeJob = requestBody.WillChangeJob
-			}
-			if requestBody.WillChangeJobRole != "" {
-				update.WillChangeJobRole = requestBody.WillChangeJobRole
-			}
-			if requestBody.OpenToMeet != "" {
-				update.OpenToMeet = requestBody.OpenToMeet
-			}
-			if requestBody.RacialDemographic != "" {
-				update.RacialDemographic = requestBody.RacialDemographic
-			}
-			if requestBody.PriorKnowledge != "" {
-				update.PriorKnowledge = requestBody.PriorKnowledge
-			}
 		}
 
 		update.Enrolled = true
@@ -262,10 +259,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		}
 
 		// welcome the user
-		err = emailer.Welcome(ctx, user)
-		if err != nil {
-			u.logger.Err(err).Msgf("Failed to send welcome email to '%s'", user.Email)
-		}
+		// err = emailer.Welcome(ctx, user)
+		// if err != nil {
+		// 	u.logger.Err(err).Msgf("Failed to send welcome email to '%s'", user.Email)
+		// }
 
 		return HandleSuccess(c, user, http.StatusOK)
 	}
