@@ -1,16 +1,16 @@
-FROM golang:1.16-alpine
+FROM golang:1.17-alpine as builder
 
+RUN apk update && apk add --no-cache git bash
+
+ADD . /app
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+RUN go get ./...
+RUN go build -o application
 
-RUN go mod download
+FROM alpine:latest
 
-COPY *.go ./
-
-RUN go build -o /docker-gs-ping
+COPY --from=builder /app/application /application
 
 EXPOSE 8080
-
-CMD [ "/docker-gs-ping" ]
+ENTRYPOINT ["/application"]

@@ -125,9 +125,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		}
 
 		{
-			if requestBody.Timezone != "" {
-				update.Timezone = requestBody.Timezone
-			}
+			// if requestBody.Timezone != "" {
+			// 	update.Timezone = requestBody.Timezone
+			// }
 
 			if requestBody.LinkedInURL == "" {
 				return u.HandleError(c, errors.New("Missing Fields! LinkedIn URL is required", 400), http.StatusBadRequest)
@@ -197,10 +197,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.City = requestBody.City
 
-			if requestBody.State == "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
-			}
-			update.State = requestBody.State
+			// if requestBody.State == "" {
+			// 	return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
+			// }
+			// update.State = requestBody.State
 
 			if requestBody.ProfessionalExperience == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose a Professional Experience", 400), http.StatusBadRequest)
@@ -212,10 +212,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.Industries = requestBody.Industries
 
-			if requestBody.RacialDemographic != "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
-			}
-			update.RacialDemographic = requestBody.RacialDemographic
+			// if requestBody.RacialDemographic != "" {
+			// 	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
+			// }
+			// update.RacialDemographic = requestBody.RacialDemographic
 
 			if requestBody.PriorKnowledge != "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
