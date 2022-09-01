@@ -30,7 +30,7 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Con
 	api := e.Group("/api")
 
 	api.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		return c.String(http.StatusOK, "Backend! OK")
 	})
 	{
 		users := api.Group("/users")
