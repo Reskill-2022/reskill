@@ -4,3 +4,4 @@ secrets/
 service-account.json
 .DS_Store
 .env
+service-account*.json

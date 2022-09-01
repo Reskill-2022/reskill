@@ -13,16 +13,28 @@ import (
 )
 
 type UserRepository struct {
-	logger zerolog.Logger
-	client *firestore.Client
+	logger  zerolog.Logger
+	client1 *firestore.Client
+	client2 *firestore.Client
 }
 
 var _ UserRepositoryInterface = (*UserRepository)(nil)
 
 func NewUserRepository(logger zerolog.Logger) *UserRepository {
+	r := &UserRepository{
+		logger: logger,
+	}
+
+	r.client1 = getClient("./service-account-1.json")
+	r.client2 = getClient("./service-account-2.json")
+
+	return r
+}
+
+func getClient(saFile string) *firestore.Client {
 	ctx := context.Background()
 
-	sa := option.WithCredentialsFile("./service-account.json")
+	sa := option.WithCredentialsFile(saFile)
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
@@ -33,7 +45,7 @@ func NewUserRepository(logger zerolog.Logger) *UserRepository {
 		log.Fatalln(err)
 	}
 
-	return &UserRepository{logger, client}
+	return client
 }
 
 func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
