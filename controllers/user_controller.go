@@ -207,20 +207,20 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.ProfessionalExperience = requestBody.ProfessionalExperience
 
+			if requestBody.Industries == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
+			}
 			update.Industries = requestBody.Industries
-			// if requestBody.Industries != "" {
-			// 	// return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
-			// }
 
-			// if requestBody.RacialDemographic != "" {
-			// 	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
-			// }
-			// update.RacialDemographic = requestBody.RacialDemographic
+			//if requestBody.RacialDemographic == "" {
+			//	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
+			//}
+			//update.RacialDemographic = requestBody.RacialDemographic
 
+			if requestBody.PriorKnowledge == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
+			}
 			update.PriorKnowledge = requestBody.PriorKnowledge
-			// if requestBody.PriorKnowledge != "" {
-			// 	return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
-			// }
 
 			if requestBody.ReferralOther != "" {
 				// referralOther is optional

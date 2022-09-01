@@ -1,8 +1,11 @@
 package email
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
@@ -39,6 +42,47 @@ func NewMailChimp(apiKey string, logger zerolog.Logger) (*mailchimp, error) {
 }
 
 func (m *mailchimp) Welcome(ctx context.Context, user *model.User) error {
+	endpoint := "https://mandrillapp.com/api/1.0/messages/send"
+
+	payload := map[string]interface{}{
+		"key": m.apiKey,
+		"message": map[string]interface{}{
+			"html":       welcomeHTML,
+			"subject":    "Welcome to ReskillAmericans",
+			"from_email": "info@reskillamericans.org",
+			"to": []map[string]interface{}{
+				{
+					"email": user.Email,
+					"name":  user.Name,
+				},
+			},
+		},
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+
+	if resp.StatusCode != 200 {
+		// dump the response body for debugging
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		fmt.Println(buf.String())
+		return fmt.Errorf("failed to send email: %d", resp.StatusCode)
+	}
+
 	return nil
 }
 
@@ -75,3 +119,9 @@ func (s *sesEmailer) Welcome(ctx context.Context, user *model.User) error {
 
 	return nil
 }
+
+/*
+curl -X POST \
+  https://mandrillapp.com/api/1.0/messages/send-template \
+  -d '{"key":"","template_name":"","template_content":[],"message":{"html":"","text":"","subject":"","from_email":"","from_name":"","to":[],"headers":{},"important":false,"track_opens":false,"track_clicks":false,"auto_text":false,"auto_html":false,"inline_css":false,"url_strip_qs":false,"preserve_recipients":false,"view_content_link":false,"bcc_address":"","tracking_domain":"","signing_domain":"","return_path_domain":"","merge":false,"merge_language":"mailchimp","global_merge_vars":[],"merge_vars":[],"tags":[],"subaccount":"","google_analytics_domains":[],"google_analytics_campaign":"","metadata":{"website":""},"recipient_metadata":[],"attachments":[],"images":[]},"async":false,"ip_pool":"","send_at":""}'
+*/
