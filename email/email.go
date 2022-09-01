@@ -3,12 +3,14 @@ package email
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/rs/zerolog"
 	"github.com/thealamu/linkedinsignin/constants"
+	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/model"
 )
 
@@ -22,9 +24,25 @@ type (
 		client *ses.Client
 		logger zerolog.Logger
 	}
+
+	mailchimp struct {
+		apiKey string
+	}
 )
 
-func New(ctx context.Context, logger zerolog.Logger) (*sesEmailer, error) {
+func NewMailChimp(apiKey string, logger zerolog.Logger) (*mailchimp, error) {
+	if apiKey == "" {
+		return nil, errors.New("apiKey is required", 400)
+	}
+
+	return &mailchimp{apiKey: apiKey}, nil
+}
+
+func (m *mailchimp) Welcome(ctx context.Context, user *model.User) error {
+	return nil
+}
+
+func NewSES(ctx context.Context, logger zerolog.Logger) (*sesEmailer, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load aws config: %w", err)

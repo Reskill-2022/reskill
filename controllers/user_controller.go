@@ -240,6 +240,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
 
+		if err := emailer.Welcome(ctx, user); err != nil {
+			u.logger.Error().Err(err).Msg("failed to send welcome email")
+		}
+
 		return HandleSuccess(c, user, http.StatusOK)
 	}
 }
