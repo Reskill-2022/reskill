@@ -6,9 +6,7 @@ import (
 )
 
 const (
-	Port = "PORT"
-	// MSAAUTH      = "MSAAUTH"
-	// OutlookToken = "OUTLOOK_TOKEN"
+	Port            = "PORT"
 	ClientID        = "CLIENT_ID"
 	ClientSecret    = "CLIENT_SECRET"
 	ServiceAccount1 = "SERVICE_ACCOUNT_1"
@@ -30,7 +28,6 @@ func New() (Environment, error) {
 		if !ok {
 			return nil, fmt.Errorf("can't find '%s' in environment", key)
 		}
-		fmt.Println(key, v)
 		env[key] = v
 	}
 	return env, nil
