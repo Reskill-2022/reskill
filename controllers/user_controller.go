@@ -207,10 +207,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.ProfessionalExperience = requestBody.ProfessionalExperience
 
-			if requestBody.Industries != "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
-			}
 			update.Industries = requestBody.Industries
+			// if requestBody.Industries != "" {
+			// 	// return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
+			// }
 
 			// if requestBody.RacialDemographic != "" {
 			// 	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
