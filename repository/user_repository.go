@@ -56,17 +56,21 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 		return gotUser, nil
 	}
 
-	_, err = u.client.Collection("users").Doc(user.Email).Set(ctx, user)
-	if err != nil {
-		return nil, errors.From(err, "failed to create user", 500)
+	if _, err := u.client1.Collection("users").Doc(user.Email).Set(ctx, user); err != nil {
+		return nil, errors.From(err, "client1 failed to create user", 500)
 	}
+
+	if _, err := u.client2.Collection("users").Doc(user.Email).Set(ctx, user); err != nil {
+		return nil, errors.From(err, "client2 failed to create user", 500)
+	}
+
 	return &user, nil
 }
 
 func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*model.User, error) {
 	u.logger.Debug().Msgf("Firestore: updating user with email: %s", user.Email)
 
-	_, err := u.client.Collection("users").Doc(user.Email).Update(ctx, []firestore.Update{
+	updates := []firestore.Update{
 		{Path: "representation", Value: user.Representation},
 		{Path: "gender", Value: user.Gender},
 		{Path: "age_group", Value: user.AgeGroup},
@@ -97,17 +101,23 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "racial_demographic", Value: user.RacialDemographic},
 		{Path: "prior_knowledge", Value: user.PriorKnowledge},
 		{Path: "linkedin_url", Value: user.LinkedInURL},
-	})
-	if err != nil {
-		return nil, errors.From(err, "failed to update user data", 500)
 	}
+
+	if _, err := u.client1.Collection("users").Doc(user.Email).Update(ctx, updates); err != nil {
+		return nil, errors.From(err, "client1 failed to update user data", 500)
+	}
+
+	if _, err := u.client2.Collection("users").Doc(user.Email).Update(ctx, updates); err != nil {
+		return nil, errors.From(err, "client2 failed to update user data", 500)
+	}
+
 	return &user, nil
 }
 
 func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User, error) {
 	u.logger.Debug().Msgf("Firestore: getting user with email: %s", email)
 
-	data, err := u.client.Collection("users").Doc(email).Get(ctx)
+	data, err := u.client1.Collection("users").Doc(email).Get(ctx)
 	if err != nil {
 		return nil, errors.From(err, "User Account Not Found", 404)
 	}
