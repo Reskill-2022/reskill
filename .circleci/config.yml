@@ -1,0 +1,58 @@
+version: 2.1
+
+jobs:
+  deploy:
+    docker:
+      - image: eamonwoortman/alpine-python-curl-zip
+        auth:
+          username: $USERNAME
+          password: $PASSWORD
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: false
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update docker openrc
+            curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-400.0.0-linux-x86_64.tar.gz
+
+      - run:
+          name: Build image
+          command: |
+            docker build -t reskillform .
+      
+      - run:
+          name: Run image
+          command: |
+            docker run -d -it -p  8080:8080 --name reskillform mollyladson/reskillform
+
+      - run:
+          name: Login
+          command: |
+            echo $PASSWORD
+            echo $USERNAME
+            docker login -u $USERNAME -p $PASSWORD
+
+      - run:
+          name: Tag image
+          command: |
+            docker tag reskillform mollyladson/reskillform
+
+      - run:
+          name: Push image
+          command: |
+            docker push mollyladson/reskillform
+
+workflows:
+  default:
+    jobs:
+      - deploy
+
+
+
+
+
+
