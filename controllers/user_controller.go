@@ -217,10 +217,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			// }
 			// update.RacialDemographic = requestBody.RacialDemographic
 
-			if requestBody.PriorKnowledge != "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
-			}
 			update.PriorKnowledge = requestBody.PriorKnowledge
+			// if requestBody.PriorKnowledge != "" {
+			// 	return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
+			// }
 
 			if requestBody.ReferralOther != "" {
 				// referralOther is optional
