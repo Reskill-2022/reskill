@@ -30,6 +30,7 @@ func New() (Environment, error) {
 		if !ok {
 			return nil, fmt.Errorf("can't find '%s' in environment", key)
 		}
+		fmt.Println(key, v)
 		env[key] = v
 	}
 	return env, nil
