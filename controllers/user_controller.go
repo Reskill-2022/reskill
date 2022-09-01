@@ -207,10 +207,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.ProfessionalExperience = requestBody.ProfessionalExperience
 
-			if requestBody.Industries == "" {
+			industries := strings.Replace(requestBody.Industries, ",", " ", -1)
+			if strings.TrimSpace(industries) == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
 			}
-			update.Industries = requestBody.Industries
+			update.Industries = industries
 
 			//if requestBody.RacialDemographic == "" {
 			//	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
@@ -228,9 +229,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 
 			if requestBody.OptionalMajor != "" {
-				// major is optional
-				update.OptionalMajor = requestBody.OptionalMajor
+				return u.HandleError(c, errors.New("Missing Fields! Please add a Major", 400), http.StatusBadRequest)
 			}
+			update.OptionalMajor = requestBody.OptionalMajor
 
 		}
 
