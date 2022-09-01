@@ -41,7 +41,7 @@ func (u *UserRepository) CreateUser(ctx context.Context, user model.User) (*mode
 
 	gotUser, err := u.GetUser(ctx, user.Email)
 	if err == nil || gotUser != nil {
-		return nil, errors.New("User Account Already Exists", 400)
+		return gotUser, nil
 	}
 
 	_, err = u.client.Collection("users").Doc(user.Email).Set(ctx, user)
@@ -63,7 +63,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "optional_major", Value: user.OptionalMajor},
 		{Path: "can_work_in_usa", Value: user.CanWorkInUSA},
 		{Path: "learning_track", Value: user.LearningTrack},
-		{Path: "tech_experience", Value: user.TechExperience},
+		// {Path: "tech_experience", Value: user.TechExperience},
 		{Path: "hours_per_week", Value: user.HoursPerWeek},
 		{Path: "referral", Value: user.Referral},
 		{Path: "referral_other", Value: user.ReferralOther},
@@ -77,6 +77,14 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "figma_yes", Value: user.FigmaYes},
 		{Path: "city", Value: user.City},
 		{Path: "state", Value: user.State},
+		{Path: "professional_experience", Value: user.ProfessionalExperience},
+		{Path: "industries", Value: user.Industries},
+		// {Path: "will_change_job", Value: user.WillChangeJob},
+		// {Path: "will_change_job_role", Value: user.WillChangeJobRole},
+		// {Path: "open_to_meet", Value: user.OpenToMeet},
+		{Path: "racial_demographic", Value: user.RacialDemographic},
+		{Path: "prior_knowledge", Value: user.PriorKnowledge},
+		{Path: "linkedin_url", Value: user.LinkedInURL},
 	})
 	if err != nil {
 		return nil, errors.From(err, "failed to update user data", 500)

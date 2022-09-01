@@ -1,15 +1,14 @@
 package controllers
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
+
 	"github.com/thealamu/linkedinsignin/email"
 	"github.com/thealamu/linkedinsignin/errors"
 	"github.com/thealamu/linkedinsignin/linkedin"
@@ -33,26 +32,30 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		var requestBody requests.CreateUserRequest
 
 		// dump request body
-		var body bytes.Buffer
-		_, err := io.Copy(&body, c.Request().Body)
-		if err != nil {
-			u.logger.Debug().Msgf("Error reading request body: %s", err)
-		}
+		// var body bytes.Buffer
+		// _, err := io.Copy(&body, c.Request().Body)
+		// if err != nil {
+		// 	u.logger.Debug().Msgf("Error reading request body: %s", err)
+		// }
 
-		cp := body.Bytes()
-		u.logger.Debug().Msgf("Request Body: %s", cp)
+		// cp := body.Bytes()
+		// u.logger.Debug().Msgf("Request Body: %s", cp)
 
-		err = json.NewDecoder(bytes.NewReader(cp)).Decode(&requestBody)
+		err := json.NewDecoder(c.Request().Body).Decode(&requestBody)
 		if err != nil {
 			return u.HandleError(c, errors.New("Invalid JSON Request Body", 400), http.StatusBadRequest)
 		}
 
-		userEmail := strings.ToLower(requestBody.Email)
-		if userEmail == "" {
-			return u.HandleError(c, errors.New("Email is required", 400), http.StatusBadRequest)
+		authCode := requestBody.AuthCode
+		if authCode == "" {
+			return u.HandleError(c, errors.New("Auth Code is required", 400), http.StatusBadRequest)
+		}
+		redirectURI := requestBody.RedirectURI
+		if redirectURI == "" {
+			return u.HandleError(c, errors.New("Redirect URI is required", 400), http.StatusBadRequest)
 		}
 
-		profile, err := service.GetProfile(userEmail)
+		profile, err := service.GetProfile(authCode, redirectURI)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
 		}
@@ -61,29 +64,15 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 		if profile.Name == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Found No Name", 400), http.StatusBadRequest)
 		}
-		if profile.Location == "" {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your City and State of Residence on LinkedIn", 400), http.StatusBadRequest)
-		}
+
 		if profile.Photo == "" {
 			return u.HandleError(c, errors.New("Invalid Profile. Please Set Your Profile Picture on LinkedIn", 400), http.StatusBadRequest)
 		}
-		if !profile.HasExperience {
-			return u.HandleError(c, errors.New("Invalid Profile. Please Add Your Work Experience on LinkedIn", 400), http.StatusBadRequest)
-		}
-
-		//country := profile.Location
-		//i := strings.LastIndex(profile.Location, ",")
-		//if i > 0 {
-		//	country = profile.Location[i+2:]
-		//}
-		//if country != "United States" {
-		//	return u.HandleError(c, errors.New("Invalid Profile. For United States Only", 400), http.StatusBadRequest)
-		//}
 
 		firstname, lastname := u.splitNames(profile.Name)
 
 		data := model.User{
-			Email:       userEmail,
+			Email:       profile.Email,
 			Name:        profile.Name,
 			FirstName:   firstname,
 			LastName:    lastname,
@@ -113,16 +102,16 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 		var requestBody requests.UpdateUserRequest
 
 		// dump request body
-		var body bytes.Buffer
-		_, err := io.Copy(&body, c.Request().Body)
-		if err != nil {
-			u.logger.Debug().Msgf("Error reading request body: %s", err)
-		}
+		// var body bytes.Buffer
+		// _, err := io.Copy(&body, c.Request().Body)
+		// if err != nil {
+		// 	u.logger.Debug().Msgf("Error reading request body: %s", err)
+		// }
 
-		cp := body.Bytes()
-		u.logger.Debug().Msgf("Request Body: %s", cp)
+		// cp := body.Bytes()
+		// u.logger.Debug().Msgf("Request Body: %s", cp)
 
-		err = json.NewDecoder(bytes.NewReader(cp)).Decode(&requestBody)
+		err := json.NewDecoder(c.Request().Body).Decode(&requestBody)
 		if err != nil {
 			return u.HandleError(c, err, http.StatusBadRequest)
 		}
@@ -139,6 +128,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.Timezone != "" {
 				update.Timezone = requestBody.Timezone
 			}
+
+			if requestBody.LinkedInURL == "" {
+				return u.HandleError(c, errors.New("Missing Fields! LinkedIn URL is required", 400), http.StatusBadRequest)
+			}
+			update.LinkedInURL = requestBody.LinkedInURL
 
 			if requestBody.Phone == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Phone Number is required", 400), http.StatusBadRequest)
@@ -173,7 +167,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.CanWorkInUSA == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose if you can work in USA", 400), http.StatusBadRequest)
 			}
-			if strings.Title(requestBody.CanWorkInUSA) != "Yes" {
+			if strings.ToUpper(requestBody.CanWorkInUSA) != "YES" {
 				return u.HandleError(c, errors.New("It is Required that You can Work in the USA", 400), http.StatusBadRequest)
 			}
 			update.CanWorkInUSA = requestBody.CanWorkInUSA
@@ -182,11 +176,6 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				return u.HandleError(c, errors.New("Missing Fields! Please choose a Learning Track", 400), http.StatusBadRequest)
 			}
 			update.LearningTrack = requestBody.LearningTrack
-
-			if requestBody.TechExperience == "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please specify Tech Experience", 400), http.StatusBadRequest)
-			}
-			update.TechExperience = requestBody.TechExperience
 
 			if requestBody.HoursPerWeek == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose Hours available Per Week", 400), http.StatusBadRequest)
@@ -198,10 +187,40 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.Referral = requestBody.Referral
 
-			if requestBody.Photo == "" {
+			if requestBody.Photo == "" || requestBody.Photo == "null" {
 				return u.HandleError(c, errors.New("Missing Fields! Please upload a picture", 400), http.StatusBadRequest)
 			}
 			update.Photo = requestBody.Photo
+
+			if requestBody.City == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please set a City", 400), http.StatusBadRequest)
+			}
+			update.City = requestBody.City
+
+			if requestBody.State == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
+			}
+			update.State = requestBody.State
+
+			if requestBody.ProfessionalExperience == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose a Professional Experience", 400), http.StatusBadRequest)
+			}
+			update.ProfessionalExperience = requestBody.ProfessionalExperience
+
+			if requestBody.Industries != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
+			}
+			update.Industries = requestBody.Industries
+
+			if requestBody.RacialDemographic != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
+			}
+			update.RacialDemographic = requestBody.RacialDemographic
+
+			if requestBody.PriorKnowledge != "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please choose Prior Knowledge level", 400), http.StatusBadRequest)
+			}
+			update.PriorKnowledge = requestBody.PriorKnowledge
 
 			if requestBody.ReferralOther != "" {
 				// referralOther is optional
@@ -213,25 +232,12 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				update.OptionalMajor = requestBody.OptionalMajor
 			}
 
-			if requestBody.City != "" {
-				update.City = requestBody.City
-			}
-
-			if requestBody.State != "" {
-				update.State = requestBody.State
-			}
 		}
 
 		update.Enrolled = true
 		user, err := userUpdater.UpdateUser(ctx, *update)
 		if err != nil {
 			return u.HandleError(c, err, errors.CodeFrom(err))
-		}
-
-		// welcome the user
-		err = emailer.Welcome(ctx, user)
-		if err != nil {
-			u.logger.Err(err).Msgf("Failed to send welcome email to '%s'", user.Email)
 		}
 
 		return HandleSuccess(c, user, http.StatusOK)
