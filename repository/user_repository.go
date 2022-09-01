@@ -119,10 +119,7 @@ func (u *UserRepository) GetUser(ctx context.Context, email string) (*model.User
 
 	data, err := u.client1.Collection("users").Doc(email).Get(ctx)
 	if err != nil {
-		data, err = u.client2.Collection("users").Doc(email).Get(ctx)
-		if err != nil {
-			return nil, errors.From(err, "User Account Not Found", 404)
-		}
+		return nil, errors.From(err, "User Account Not Found", 404)
 	}
 
 	user := model.User{}
