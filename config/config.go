@@ -9,8 +9,10 @@ const (
 	Port = "PORT"
 	// MSAAUTH      = "MSAAUTH"
 	// OutlookToken = "OUTLOOK_TOKEN"
-	ClientID     = "CLIENT_ID"
-	ClientSecret = "CLIENT_SECRET"
+	ClientID        = "CLIENT_ID"
+	ClientSecret    = "CLIENT_SECRET"
+	ServiceAccount1 = "SERVICE_ACCOUNT_1"
+	ServiceAccount2 = "SERVICE_ACCOUNT_2"
 )
 
 type Environment map[string]string
@@ -21,6 +23,8 @@ func New() (Environment, error) {
 		Port,
 		ClientID,
 		ClientSecret,
+		ServiceAccount1,
+		ServiceAccount2,
 	} {
 		v, ok := os.LookupEnv(key)
 		if !ok {
