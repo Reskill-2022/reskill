@@ -11,6 +11,7 @@ const (
 	ClientSecret    = "CLIENT_SECRET"
 	ServiceAccount1 = "SERVICE_ACCOUNT_1"
 	ServiceAccount2 = "SERVICE_ACCOUNT_2"
+	MailChimpAPIKey = "MAILCHIMP_API_KEY"
 )
 
 type Environment map[string]string
@@ -23,6 +24,7 @@ func New() (Environment, error) {
 		ClientSecret,
 		ServiceAccount1,
 		ServiceAccount2,
+		MailChimpAPIKey,
 	} {
 		v, ok := os.LookupEnv(key)
 		if !ok {
