@@ -78,7 +78,6 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 			FirstName:   firstname,
 			LastName:    lastname,
 			LinkedInURL: profile.ProfileURL,
-			Location:    profile.Location,
 			Phone:       profile.Phone,
 			Photo:       profile.Photo,
 			CreatedAt:   time.Now().UTC().String(),
