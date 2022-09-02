@@ -203,7 +203,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.City == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please set a City", 400), http.StatusBadRequest)
 			}
-			if !isAlpha(requestBody.City) {
+			if hasNumbers(requestBody.City) {
 				return u.HandleError(c, errors.New("Invalid City", 400), http.StatusBadRequest)
 			}
 			update.City = requestBody.City
@@ -251,7 +251,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.OptionalMajor != "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please add a Field of Study", 400), http.StatusBadRequest)
 			}
-			if !isAlpha(requestBody.OptionalMajor) {
+			if hasNumbers(requestBody.OptionalMajor) {
 				return u.HandleError(c, errors.New("Invalid Field of Study", 400), http.StatusBadRequest)
 			}
 			update.OptionalMajor = requestBody.OptionalMajor
@@ -343,6 +343,15 @@ func isAlpha(s string) bool {
 		}
 	}
 	return true
+}
+
+func hasNumbers(s string) bool {
+	for _, r := range s {
+		if unicode.IsNumber(r) {
+			return true
+		}
+	}
+	return false
 }
 
 func isNum(s string) bool {
