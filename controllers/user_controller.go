@@ -248,7 +248,7 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 				update.ReferralOther = requestBody.ReferralOther
 			}
 
-			if requestBody.OptionalMajor != "" {
+			if requestBody.OptionalMajor == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please add a Field of Study", 400), http.StatusBadRequest)
 			}
 			if hasNumbers(requestBody.OptionalMajor) {
