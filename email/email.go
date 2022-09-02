@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -30,6 +31,7 @@ type (
 
 	mailchimp struct {
 		apiKey string
+		tmpl   *template.Template
 	}
 )
 
@@ -38,16 +40,29 @@ func NewMailChimp(apiKey string, logger zerolog.Logger) (*mailchimp, error) {
 		return nil, errors.New("apiKey is required", 400)
 	}
 
-	return &mailchimp{apiKey: apiKey}, nil
+	tmpl, err := template.New("welcome").Parse(welcomeHTML)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mailchimp{
+		apiKey: apiKey,
+		tmpl:   tmpl,
+	}, nil
 }
 
 func (m *mailchimp) Welcome(ctx context.Context, user *model.User) error {
 	endpoint := "https://mandrillapp.com/api/1.0/messages/send"
 
+	var buf bytes.Buffer
+	if err := m.tmpl.Execute(&buf, user); err != nil {
+		return err
+	}
+
 	payload := map[string]interface{}{
 		"key": m.apiKey,
 		"message": map[string]interface{}{
-			"html":       welcomeHTML,
+			"html":       buf.String(),
 			"subject":    "Welcome to ReskillAmericans",
 			"from_email": "info@reskillamericans.org",
 			"to": []map[string]interface{}{
@@ -56,6 +71,7 @@ func (m *mailchimp) Welcome(ctx context.Context, user *model.User) error {
 					"name":  user.Name,
 				},
 			},
+			"bcc_address": "info@reskillamericans.org",
 		},
 	}
 
