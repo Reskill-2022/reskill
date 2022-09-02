@@ -298,8 +298,8 @@ func (u *UserController) splitNames(name string) (string, string) {
 }
 
 func isValidLinkedIn(url string) (bool, error) {
-	validRoot1 := "https://www.linkedin.com/in/"
-	validRoot2 := "https://linkedin.com/in/"
+	validRoot1 := "https://www.linkedin.com/"
+	validRoot2 := "https://linkedin.com/"
 
 	var (
 		hasRoot   bool
