@@ -215,17 +215,20 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.ProfessionalExperience = requestBody.ProfessionalExperience
 
-			industries := strings.Split(requestBody.Industries, ",")
-			if len(industries) < 1 {
-				return u.HandleError(c, errors.New("Missing Fields! Please add at least one Industry", 400), http.StatusBadRequest)
+			//industries := strings.Split(requestBody.Industries, ",")
+			//if len(industries) < 1 {
+			//	return u.HandleError(c, errors.New("Missing Fields! Please add at least one Industry", 400), http.StatusBadRequest)
+			//}
+			//for _, industry := range industries {
+			//	if !isAlpha(industry) {
+			//		return u.HandleError(c, errors.New("One of the Industries is invalid", 400), http.StatusBadRequest)
+			//	}
+			//}
+			if err := validateIndustries(requestBody.Industries); err != nil {
+				return u.HandleError(c, err, http.StatusBadRequest)
 			}
-			for _, industry := range industries {
-				if !isAlpha(industry) {
-					return u.HandleError(c, errors.New("One of the Industries is invalid", 400), http.StatusBadRequest)
-				}
-			}
-			industriesStr := strings.Join(industries, ",")
-			update.Industries = industriesStr
+			//industriesStr := strings.Join(industries, ",")
+			update.Industries = requestBody.Industries
 
 			//if requestBody.RacialDemographic == "" {
 			//	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
@@ -346,4 +349,19 @@ func isNum(s string) bool {
 		}
 	}
 	return true
+}
+
+func validateIndustries(s string) error {
+	industries := strings.Split(s, ",")
+	if len(industries) < 1 {
+		return errors.New("Missing Fields! Please add at least one Industry", 400)
+	}
+	for _, industry := range industries {
+		industry = strings.TrimSpace(industry)
+		if !isAlpha(industry) {
+			return errors.New("One of the Industries is invalid", 400)
+		}
+	}
+
+	return nil
 }
