@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
@@ -132,7 +133,11 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.LinkedInURL == "" {
 				return u.HandleError(c, errors.New("Missing Fields! LinkedIn URL is required", 400), http.StatusBadRequest)
 			}
-			if !strings.HasPrefix(requestBody.LinkedInURL, "https://www.linkedin.com/in/") {
+			match, err := isValidLinkedIn(requestBody.LinkedInURL)
+			if err != nil {
+				return u.HandleError(c, err, errors.CodeFrom(err))
+			}
+			if !match {
 				return u.HandleError(c, errors.New("Invalid LinkedIn URL", 400), http.StatusBadRequest)
 			}
 			update.LinkedInURL = requestBody.LinkedInURL
@@ -210,11 +215,17 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 			update.ProfessionalExperience = requestBody.ProfessionalExperience
 
-			industries := strings.Replace(requestBody.Industries, ",", " ", -1)
-			if strings.TrimSpace(industries) == "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please add an Industry", 400), http.StatusBadRequest)
+			industries := strings.Split(requestBody.Industries, ",")
+			if len(industries) < 1 {
+				return u.HandleError(c, errors.New("Missing Fields! Please add at least one Industry", 400), http.StatusBadRequest)
 			}
-			update.Industries = industries
+			for _, industry := range industries {
+				if !isAlpha(industry) {
+					return u.HandleError(c, errors.New("One of the Industries is invalid", 400), http.StatusBadRequest)
+				}
+			}
+			industriesStr := strings.Join(industries, ",")
+			update.Industries = industriesStr
 
 			//if requestBody.RacialDemographic == "" {
 			//	return u.HandleError(c, errors.New("Missing Fields! Please choose a Racial Demographic", 400), http.StatusBadRequest)
@@ -232,7 +243,10 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			}
 
 			if requestBody.OptionalMajor != "" {
-				return u.HandleError(c, errors.New("Missing Fields! Please add a Major", 400), http.StatusBadRequest)
+				return u.HandleError(c, errors.New("Missing Fields! Please add a Field of Study", 400), http.StatusBadRequest)
+			}
+			if !isAlpha(requestBody.OptionalMajor) {
+				return u.HandleError(c, errors.New("Invalid Field of Study", 400), http.StatusBadRequest)
 			}
 			update.OptionalMajor = requestBody.OptionalMajor
 
@@ -276,4 +290,60 @@ func (u *UserController) splitNames(name string) (string, string) {
 		return names[0], ""
 	}
 	return names[0], names[len(names)-1]
+}
+
+func isValidLinkedIn(url string) (bool, error) {
+	validRoot1 := "https://www.linkedin.com/in/"
+	validRoot2 := "https://linkedin.com/in/"
+
+	var (
+		hasRoot   bool
+		afterRoot string
+	)
+
+	if strings.HasPrefix(url, validRoot1) {
+		hasRoot = true
+		afterRoot = url[len(validRoot1):]
+
+	} else if strings.HasPrefix(url, validRoot2) {
+		hasRoot = true
+		afterRoot = url[len(validRoot2):]
+	}
+
+	if !hasRoot {
+		return false, nil //errors.New("Invalid LinkedIn URL", 400)
+	}
+
+	if strings.TrimSpace(afterRoot) == "" {
+		return false, nil //errors.New("Invalid LinkedIn URL", 400)
+	}
+
+	return true, nil
+}
+
+func isAlphaNum(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func isAlpha(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func isNum(s string) bool {
+	for _, r := range s {
+		if !unicode.IsNumber(r) {
+			return false
+		}
+	}
+	return true
 }
