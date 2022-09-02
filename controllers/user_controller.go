@@ -370,7 +370,7 @@ func validateIndustries(s string) error {
 	}
 	for _, industry := range industries {
 		industry = strings.TrimSpace(industry)
-		if !isAlpha(industry) {
+		if hasNumbers(industry) {
 			return errors.New("One of the Industries is invalid", 400)
 		}
 	}
