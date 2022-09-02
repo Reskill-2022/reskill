@@ -132,6 +132,9 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.LinkedInURL == "" {
 				return u.HandleError(c, errors.New("Missing Fields! LinkedIn URL is required", 400), http.StatusBadRequest)
 			}
+			if !strings.HasPrefix(requestBody.LinkedInURL, "https://www.linkedin.com/in/") {
+				return u.HandleError(c, errors.New("Invalid LinkedIn URL", 400), http.StatusBadRequest)
+			}
 			update.LinkedInURL = requestBody.LinkedInURL
 
 			if requestBody.Phone == "" {
