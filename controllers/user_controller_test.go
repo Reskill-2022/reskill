@@ -23,3 +23,25 @@ func TestLinkedinURL(t *testing.T) {
 		}
 	}
 }
+
+func TestIndustries(t *testing.T) {
+	testCases := []struct {
+		industries string
+		match      bool
+	}{
+		{",", false},
+		{"", false},
+		{"industry, industry,industry,industry, industry", true},
+		{",,,", false},
+		{",,industry", false},
+		{"industry,industry,industry", true},
+		{"industry", true},
+	}
+
+	for _, tc := range testCases {
+		err := validateIndustries(tc.industries)
+		if err != nil {
+			t.Errorf("validateIndustries(%s) returned unexpected error: %v", tc.industries, err)
+		}
+	}
+}
