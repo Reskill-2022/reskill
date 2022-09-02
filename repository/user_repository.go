@@ -92,7 +92,7 @@ func (u *UserRepository) UpdateUser(ctx context.Context, user model.User) (*mode
 		{Path: "git_yes", Value: user.GitYes},
 		{Path: "figma_yes", Value: user.FigmaYes},
 		{Path: "city", Value: user.City},
-		// {Path: "state", Value: user.State},
+		{Path: "state", Value: user.State},
 		{Path: "professional_experience", Value: user.ProfessionalExperience},
 		{Path: "industries", Value: user.Industries},
 		// {Path: "will_change_job", Value: user.WillChangeJob},

@@ -203,12 +203,15 @@ func (u *UserController) UpdateUser(userGetter repository.UserGetter, userUpdate
 			if requestBody.City == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please set a City", 400), http.StatusBadRequest)
 			}
+			if !isAlpha(requestBody.City) {
+				return u.HandleError(c, errors.New("Invalid City", 400), http.StatusBadRequest)
+			}
 			update.City = requestBody.City
 
-			// if requestBody.State == "" {
-			// 	return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
-			// }
-			// update.State = requestBody.State
+			if requestBody.State == "" {
+				return u.HandleError(c, errors.New("Missing Fields! Please set a State", 400), http.StatusBadRequest)
+			}
+			update.State = requestBody.State
 
 			if requestBody.ProfessionalExperience == "" {
 				return u.HandleError(c, errors.New("Missing Fields! Please choose a Professional Experience", 400), http.StatusBadRequest)
