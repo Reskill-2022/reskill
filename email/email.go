@@ -63,7 +63,7 @@ func (m *mailchimp) Welcome(ctx context.Context, user *model.User) error {
 		"key": m.apiKey,
 		"message": map[string]interface{}{
 			"html":       buf.String(),
-			"subject":    "Welcome to ReskillAmericans",
+			"subject":    "Welcome to Reskill Americans",
 			"from_email": "info@reskillamericans.org",
 			"to": []map[string]interface{}{
 				{
