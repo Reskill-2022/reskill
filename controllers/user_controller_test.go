@@ -11,6 +11,7 @@ func TestLinkedinURL(t *testing.T) {
 		{"https://linkedin.com/in/marllos-p-a383641b2/", true},
 		{"https://", false},
 		{"https://www.linkedin.com/in/", false},
+		{"https://www.linkedin.com/mwlite/in/techypally", true},
 	}
 
 	for _, tc := range testCases {

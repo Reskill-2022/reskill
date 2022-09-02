@@ -298,8 +298,10 @@ func (u *UserController) splitNames(name string) (string, string) {
 }
 
 func isValidLinkedIn(url string) (bool, error) {
-	validRoot1 := "https://www.linkedin.com/"
-	validRoot2 := "https://linkedin.com/"
+	validRoot1 := "https://www.linkedin.com/in/"
+	validRoot2 := "https://linkedin.com/in/"
+	validRoot3 := "https://www.linkedin.com/mwlite/in/"
+	validRoot4 := "https://linkedin.com/mwlite/in/"
 
 	var (
 		hasRoot   bool
@@ -309,10 +311,15 @@ func isValidLinkedIn(url string) (bool, error) {
 	if strings.HasPrefix(url, validRoot1) {
 		hasRoot = true
 		afterRoot = url[len(validRoot1):]
-
 	} else if strings.HasPrefix(url, validRoot2) {
 		hasRoot = true
 		afterRoot = url[len(validRoot2):]
+	} else if strings.HasPrefix(url, validRoot3) {
+		hasRoot = true
+		afterRoot = url[len(validRoot3):]
+	} else if strings.HasPrefix(url, validRoot4) {
+		hasRoot = true
+		afterRoot = url[len(validRoot4):]
 	}
 
 	if !hasRoot {
