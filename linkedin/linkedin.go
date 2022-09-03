@@ -230,7 +230,7 @@ func getUserProfile(token string) (string, string, string, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return "", "", "", fmt.Errorf("failed to get access token, not ok")
+		return "", "", "", fmt.Errorf("failed to get full user profile, not ok")
 	}
 	defer resp.Body.Close()
 

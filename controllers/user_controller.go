@@ -58,7 +58,8 @@ func (u *UserController) CreateUser(userCreator repository.UserCreator, service 
 
 		profile, err := service.GetProfile(authCode, redirectURI)
 		if err != nil {
-			return u.HandleError(c, err, errors.CodeFrom(err))
+			u.logger.Err(err).Msg("Error getting profile")
+			return u.HandleError(c, errors.New("Failed to Validate LinkedIn Profile", 400), http.StatusBadRequest)
 		}
 
 		// do validations
