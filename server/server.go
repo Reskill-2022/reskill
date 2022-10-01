@@ -3,6 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
@@ -11,10 +16,6 @@ import (
 	"github.com/thealamu/linkedinsignin/email"
 	"github.com/thealamu/linkedinsignin/linkedin"
 	"github.com/thealamu/linkedinsignin/repository"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Container, service linkedin.Service, emailer email.Emailer) {
@@ -33,11 +34,11 @@ func registerRoutes(e *echo.Echo, cts *controllers.Container, rc *repository.Con
 		return c.String(http.StatusOK, "Backend! OK")
 	})
 	{
-		users := api.Group("/users")
+		// users := api.Group("/users")
 
-		users.POST("", cts.UserController.CreateUser(rc.UserRepository, service))
-		users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository, rc.UserRepository, emailer))
-		users.GET("/:email", cts.UserController.GetUser(rc.UserRepository))
+		// users.POST("", cts.UserController.CreateUser(rc.UserRepository, service))
+		// users.PUT("/:email", cts.UserController.UpdateUser(rc.UserRepository, rc.UserRepository, emailer))
+		// users.GET("/:email", cts.UserController.GetUser(rc.UserRepository))
 	}
 }
 
